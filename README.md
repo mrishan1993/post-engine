@@ -34,6 +34,23 @@ trend briefs --source trend_engine_v2
 
 Config: `trend_engine/config/sources.yaml` (collectors), `trend_engine/config/v2.yaml` (characters, opportunity weights). Stubs on by default.
 
+## Probability & Verification Engine
+
+Before production, every opportunity gets a full prediction object (probability + expected values + confidence + reasoning). After publish, verification compares predicted vs actual and feeds calibration.
+
+```bash
+trend v2                                 # opportunities → briefs + predictions
+predict list                             # pending predictions
+predict show <id>                        # explainability
+predict rank -v horror_narration         # production queue by expected score
+predict verify <id> --views 190000       # manual verification
+predict calibration
+predict kpis
+predict retrain                          # apply vertical calibration multipliers
+```
+
+Workflow: **Trend → Predict → Rank → Create → Publish → Measure → Verify → Learn**.
+
 ## Architecture
 
 - **Config-driven verticals** — `config/verticals/*.yaml` validated by Pydantic (`config/schema.py`)
@@ -81,6 +98,7 @@ Phase-1 skeleton from PRP v3 + Trend Engine PRP v1:
 - [x] Trend tables + YouTube/Google Trends collectors (stub + live hooks)
 - [x] Scoring + brief generator → `content_briefs`
 - [x] V2: Content DNA, lifecycle, knowledge graph, opportunity score, character adaptation
+- [x] Probability Engine + Prediction Registry + Verification + calibration
 - [ ] Real Anthropic / ElevenLabs / Suno clients
 - [ ] Mouth-flap / Ken Burns compositors
 - [ ] YouTube OAuth upload + Instagram public-URL hosting

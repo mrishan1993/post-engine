@@ -491,3 +491,144 @@ class CompetitorChannel(Base):
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+
+# ---------------------------------------------------------------------------
+# Probability Engine & Verification — Prediction Registry
+# ---------------------------------------------------------------------------
+
+
+class Prediction(Base):
+    """Central registry row for any AI decision (content, trend, experiment, publish)."""
+
+    __tablename__ = "predictions"
+    __table_args__ = (
+        Index("idx_predictions_brief", "content_brief_id"),
+        Index("idx_predictions_subsystem", "subsystem", "created_at"),
+        Index("idx_predictions_status", "status"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subsystem: Mapped[str] = mapped_column(String(64), nullable=False)
+    # probability_engine | trend_engine | character_engine | experiment_engine | publishing_engine
+    decision_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    # virality | variant_choice | publish_timing | opportunity_rank
+    content_brief_id: Mapped[int | None] = mapped_column(ForeignKey("content_briefs.id"))
+    video_run_id: Mapped[int | None] = mapped_column(ForeignKey("video_runs.id"))
+    opportunity_id: Mapped[int | None] = mapped_column(ForeignKey("opportunity_scores.id"))
+    vertical_slug: Mapped[str | None] = mapped_column(String(64))
+    platform: Mapped[str | None] = mapped_column(String(32))
+    model_version: Mapped[str] = mapped_column(String(64), default="rule_v1")
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    # pending | verified | expired
+
+    virality_probability: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    predicted_views: Mapped[int | None] = mapped_column(Integer)
+    predicted_views_low: Mapped[int | None] = mapped_column(Integer)
+    predicted_views_high: Mapped[int | None] = mapped_column(Integer)
+    predicted_reach: Mapped[int | None] = mapped_column(Integer)
+    predicted_ctr: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    predicted_watch_time_sec: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    predicted_retention: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    predicted_engagement_rate: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    predicted_shares: Mapped[int | None] = mapped_column(Integer)
+    predicted_saves: Mapped[int | None] = mapped_column(Integer)
+    predicted_comments: Mapped[int | None] = mapped_column(Integer)
+    predicted_followers: Mapped[int | None] = mapped_column(Integer)
+    predicted_revenue_usd: Mapped[float | None] = mapped_column(Numeric(10, 2))
+    predicted_roi: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    expected_cost_usd: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    final_opportunity_score: Mapped[float | None] = mapped_column(Numeric(6, 2))
+    risk_score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+
+    metrics_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    reasoning_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    features: Mapped[list[PredictionFeature]] = relationship(back_populates="prediction")
+    verification: Mapped[VerificationResult | None] = relationship(back_populates="prediction", uselist=False)
+    errors: Mapped[list[PredictionError]] = relationship(back_populates="prediction")
+
+
+class PredictionFeature(Base):
+    __tablename__ = "prediction_features"
+    __table_args__ = (
+        Index("idx_prediction_features_pred", "prediction_id"),
+        UniqueConstraint("prediction_id", "feature_name", name="uq_prediction_feature"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    prediction_id: Mapped[int] = mapped_column(ForeignKey("predictions.id"), nullable=False)
+    feature_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    feature_value: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    feature_raw: Mapped[str | None] = mapped_column(Text)
+
+    prediction: Mapped[Prediction] = relationship(back_populates="features")
+
+
+class VerificationResult(Base):
+    __tablename__ = "verification_results"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    prediction_id: Mapped[int] = mapped_column(ForeignKey("predictions.id"), unique=True, nullable=False)
+    actual_views: Mapped[int | None] = mapped_column(Integer)
+    actual_ctr: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    actual_retention: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    actual_watch_time_sec: Mapped[float | None] = mapped_column(Numeric(8, 2))
+    actual_comments: Mapped[int | None] = mapped_column(Integer)
+    actual_shares: Mapped[int | None] = mapped_column(Integer)
+    actual_saves: Mapped[int | None] = mapped_column(Integer)
+    actual_followers: Mapped[int | None] = mapped_column(Integer)
+    actual_revenue_usd: Mapped[float | None] = mapped_column(Numeric(10, 2))
+    actual_engagement_rate: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    metrics_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    explanation: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    mape: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    prediction: Mapped[Prediction] = relationship(back_populates="verification")
+
+
+class PredictionError(Base):
+    __tablename__ = "prediction_errors"
+    __table_args__ = (
+        Index("idx_prediction_errors_pred", "prediction_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    prediction_id: Mapped[int] = mapped_column(ForeignKey("predictions.id"), nullable=False)
+    metric: Mapped[str] = mapped_column(String(64), nullable=False)
+    predicted: Mapped[float | None] = mapped_column(Numeric(14, 4))
+    actual: Mapped[float | None] = mapped_column(Numeric(14, 4))
+    absolute_error: Mapped[float | None] = mapped_column(Numeric(14, 4))
+    percentage_error: Mapped[float | None] = mapped_column(Numeric(10, 4))
+
+    prediction: Mapped[Prediction] = relationship(back_populates="errors")
+
+
+class ModelVersion(Base):
+    __tablename__ = "model_versions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    subsystem: Mapped[str] = mapped_column(String(64), default="probability_engine")
+    weights: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    calibration: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PredictionLesson(Base):
+    """Root-cause / lessons-learned rows feeding the learning engine."""
+
+    __tablename__ = "prediction_lessons"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    prediction_id: Mapped[int] = mapped_column(ForeignKey("predictions.id"), nullable=False)
+    primary_cause: Mapped[str | None] = mapped_column(Text)
+    secondary_causes: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    suggested_confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    lesson: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+

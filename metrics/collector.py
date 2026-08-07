@@ -3,21 +3,34 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from db.models import Publication, VideoMetric
+from prediction.verification import verify_from_video_run
 
 
-def collect_stub_metrics(session: Session, publication_id: int) -> VideoMetric:
-    """Placeholder metrics pull until YouTube Analytics API is wired."""
+def collect_stub_metrics(
+    session: Session,
+    publication_id: int,
+    *,
+    views: int = 0,
+    avg_view_duration_sec: int = 0,
+    likes: int = 0,
+    comments: int = 0,
+    estimated_revenue_usd: float = 0,
+    auto_verify: bool = True,
+) -> VideoMetric:
+    """Ingest metrics; optionally trigger Verification Engine for linked predictions."""
     pub = session.get(Publication, publication_id)
     if not pub:
         raise ValueError(f"publication {publication_id} not found")
     metric = VideoMetric(
         publication_id=publication_id,
-        views=0,
-        avg_view_duration_sec=0,
-        likes=0,
-        comments=0,
-        estimated_revenue_usd=0,
+        views=views,
+        avg_view_duration_sec=avg_view_duration_sec,
+        likes=likes,
+        comments=comments,
+        estimated_revenue_usd=estimated_revenue_usd,
     )
     session.add(metric)
     session.flush()
+    if auto_verify and pub.video_run_id:
+        verify_from_video_run(session, pub.video_run_id)
     return metric

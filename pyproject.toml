@@ -28,6 +28,7 @@ trends = [
 [project.scripts]
 pipeline = "cli.main:app"
 trend = "trend_engine.cli.main:app"
+predict = "prediction.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -46,6 +47,7 @@ packages = [
     "qa",
     "rigs",
     "trend_engine",
+    "prediction",
 ]
 
 [tool.pytest.ini_options]
