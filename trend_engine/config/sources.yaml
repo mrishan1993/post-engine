@@ -1,0 +1,50 @@
+# Per-source collection config. Secrets come from env, not this file.
+
+stub_mode: true   # set false + API keys for live collection
+
+min_candidates_per_vertical: 3
+brief_min_score: 0.45
+max_briefs_per_run: 10
+
+scoring_weights:
+  youtube_velocity: 0.4
+  youtube_recency: 0.15
+  google_trends_interest: 0.25
+  tiktok_presence: 0.15
+  cross_source_confirmation: 0.05
+
+# Map source categories / keyword hints → content-pipeline vertical slugs
+vertical_routing:
+  kids_rhymes:
+    youtube_categories: ["Education", "Film & Animation", "Music"]
+    keywords: ["kids", "nursery", "rhyme", "toddler", "colors", "abc", "counting"]
+  horror_narration:
+    youtube_categories: ["Entertainment", "People & Blogs", "Film & Animation"]
+    keywords: ["horror", "scary", "creepy", "spooky", "ghost", "haunted", "thriller"]
+
+youtube:
+  enabled: true
+  # Data API v3 — API key sufficient for mostPopular / search (public data)
+  regions: ["US", "GB", "IN"]
+  # YouTube category IDs: 10=Music, 24=Entertainment, 27=Education, 1=Film
+  category_ids: ["10", "24", "27", "1"]
+  max_results_per_query: 15
+  chart: mostPopular
+
+google_trends:
+  enabled: true
+  geo: ""          # empty = worldwide
+  timeframe: "now 7-d"
+  seed_queries:
+    - kids nursery rhyme
+    - learning colors song
+    - scary story short
+    - horror narration
+    - bedtime story kids
+
+tiktok:
+  enabled: false   # deferred — Creative Center / Developer API decision open
+  note: "Prefer TikTok for Developers API; public Creative Center is gray-area"
+
+instagram_own:
+  enabled: false   # owned-account Insights only when Graph credentials present

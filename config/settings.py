@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str | None = Field(default=None, alias="ELEVENLABS_API_KEY")
     elevenlabs_voice_id: str | None = Field(default=None, alias="ELEVENLABS_VOICE_ID")
     suno_api_key: str | None = Field(default=None, alias="SUNO_API_KEY")
+    youtube_api_key: str | None = Field(default=None, alias="YOUTUBE_API_KEY")
     youtube_client_id: str | None = Field(default=None, alias="YOUTUBE_CLIENT_ID")
     youtube_client_secret: str | None = Field(default=None, alias="YOUTUBE_CLIENT_SECRET")
     youtube_refresh_token: str | None = Field(default=None, alias="YOUTUBE_REFRESH_TOKEN")
@@ -34,6 +35,7 @@ class Settings(BaseSettings):
     instagram_user_id: str | None = Field(default=None, alias="INSTAGRAM_USER_ID")
     temp_hosting_base_url: str | None = Field(default=None, alias="TEMP_HOSTING_BASE_URL")
     alert_webhook_url: str | None = Field(default=None, alias="ALERT_WEBHOOK_URL")
+    trend_stub_collectors: bool = Field(default=True, alias="TREND_STUB_COLLECTORS")
 
 
 @lru_cache

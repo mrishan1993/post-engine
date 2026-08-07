@@ -184,3 +184,85 @@ class ProviderHealth(Base):
     last_failure_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
     is_healthy: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+# ---------------------------------------------------------------------------
+# Trend engine tables (shared DB with content pipeline)
+# ---------------------------------------------------------------------------
+
+
+class TrendSignal(Base):
+    __tablename__ = "trend_signals"
+    __table_args__ = (
+        Index("idx_trend_signals_source_collected", "source", "collected_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+    external_id: Mapped[str | None] = mapped_column(String(256))
+    title_or_query: Mapped[str | None] = mapped_column(Text)
+    raw_metrics: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    region: Mapped[str | None] = mapped_column(String(16))
+    category: Mapped[str | None] = mapped_column(String(64))
+    collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    topics: Mapped[list[TrendTopic]] = relationship(
+        secondary="trend_topic_signals",
+        back_populates="signals",
+    )
+
+
+class TrendTopic(Base):
+    __tablename__ = "trend_topics"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    topic_label: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    candidate_verticals: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    status: Mapped[str] = mapped_column(String(32), default="active")
+
+    signals: Mapped[list[TrendSignal]] = relationship(
+        secondary="trend_topic_signals",
+        back_populates="topics",
+    )
+    scores: Mapped[list[TrendScore]] = relationship(back_populates="topic")
+    feedback: Mapped[list[TrendFeedback]] = relationship(back_populates="topic")
+
+
+class TrendTopicSignal(Base):
+    __tablename__ = "trend_topic_signals"
+
+    topic_id: Mapped[int] = mapped_column(ForeignKey("trend_topics.id"), primary_key=True)
+    signal_id: Mapped[int] = mapped_column(ForeignKey("trend_signals.id"), primary_key=True)
+
+
+class TrendScore(Base):
+    __tablename__ = "trend_scores"
+    __table_args__ = (
+        Index("idx_trend_scores_topic_time", "topic_id", "scored_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    topic_id: Mapped[int] = mapped_column(ForeignKey("trend_topics.id"), nullable=False)
+    score: Mapped[float] = mapped_column(Numeric(6, 3), nullable=False)
+    score_breakdown: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    scored_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    topic: Mapped[TrendTopic] = relationship(back_populates="scores")
+
+
+class TrendFeedback(Base):
+    __tablename__ = "trend_feedback"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    topic_id: Mapped[int] = mapped_column(ForeignKey("trend_topics.id"), nullable=False)
+    content_brief_id: Mapped[int | None] = mapped_column(ForeignKey("content_briefs.id"))
+    predicted_score: Mapped[float | None] = mapped_column(Numeric(6, 3))
+    actual_views: Mapped[int | None] = mapped_column(Integer)
+    actual_engagement_rate: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    topic: Mapped[TrendTopic] = relationship(back_populates="feedback")
+

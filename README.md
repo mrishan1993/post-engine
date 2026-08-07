@@ -20,12 +20,26 @@ pipeline publish <id>
 
 Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`) so you can exercise the full DAG without API keys.
 
+## Trend engine
+
+Ingests sanctioned-API signals (YouTube Data API, Google Trends), scores topics, and writes into `content_briefs` with `source='trend_engine'`.
+
+```bash
+trend ingest          # collectors → score → content_briefs
+trend topics          # recent scored topics
+trend briefs          # pending trend-sourced briefs
+trend calibrate       # feedback-based weight suggestions
+```
+
+Config: `trend_engine/config/sources.yaml`. Stubs on by default (`TREND_STUB_COLLECTORS=true` / `stub_mode: true`). Live YouTube needs `YOUTUBE_API_KEY`; Google Trends live needs `pip install -e ".[trends]"`.
+
 ## Architecture
 
 - **Config-driven verticals** — `config/verticals/*.yaml` validated by Pydantic (`config/schema.py`)
 - **Hand-rolled DAG** — `orchestration/pipeline.py` + retry + state machine
 - **SQLite now / Postgres later** — SQLAlchemy models in `db/models.py`
 - **Human QA enforced in the state machine** — `qa_pending → published` is illegal; only `qa_approved → published`
+- **Trend engine** — shared DB tables (`trend_signals`, `trend_topics`, `trend_scores`, `trend_feedback`) feeding `content_briefs`
 
 ## CLI
 
@@ -38,6 +52,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`) so you can exe
 | `pipeline reject <id> --reviewer … --reason …` | Reject |
 | `pipeline regen <id> --from audio_done` | Child run from rejected parent |
 | `pipeline publish <id>` | Publish approved run |
+| `trend ingest` | Daily trend ingestion → briefs |
 
 ## Adding a vertical
 
@@ -56,12 +71,16 @@ Golden-path CI test: stub providers → `video_runs.status == qa_pending`.
 
 ## Status
 
-Phase-1 skeleton from PRP v3:
+Phase-1 skeleton from PRP v3 + Trend Engine PRP v1:
 
 - [x] DB schema + Alembic migration
 - [x] Pipeline skeleton + stub agents/providers
 - [x] CLI review/approve/reject/regen
 - [x] Minimal kids_rhymes + horror_narration rigs
+- [x] Trend tables + YouTube/Google Trends collectors (stub + live hooks)
+- [x] Scoring + brief generator → `content_briefs`
 - [ ] Real Anthropic / ElevenLabs / Suno clients
 - [ ] Mouth-flap / Ken Burns compositors
 - [ ] YouTube OAuth upload + Instagram public-URL hosting
+- [ ] TikTok collector + LLM topic clustering
+- [ ] Feedback-loop weight calibration with real metrics

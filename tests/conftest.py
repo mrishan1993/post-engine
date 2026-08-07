@@ -17,6 +17,7 @@ def db_url(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> str:
     monkeypatch.setenv("DATABASE_URL", url)
     monkeypatch.setenv("STORAGE_ROOT", str(storage))
     monkeypatch.setenv("PIPELINE_STUB_PROVIDERS", "true")
+    monkeypatch.setenv("TREND_STUB_COLLECTORS", "true")
     get_settings.cache_clear()
     reset_engine()
 

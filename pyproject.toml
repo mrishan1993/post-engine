@@ -1,7 +1,7 @@
 [project]
 name = "content-pipeline"
 version = "0.1.0"
-description = "Automated AI content pipeline with mandatory human QA gate"
+description = "Automated AI content pipeline with mandatory human QA gate + trend engine"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -21,9 +21,13 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
 ]
+trends = [
+    "pytrends>=4.9",
+]
 
 [project.scripts]
 pipeline = "cli.main:app"
+trend = "trend_engine.cli.main:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -41,6 +45,7 @@ packages = [
     "providers",
     "qa",
     "rigs",
+    "trend_engine",
 ]
 
 [tool.pytest.ini_options]
