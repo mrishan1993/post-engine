@@ -1,0 +1,35 @@
+retry:
+  script:
+    max_attempts: 2
+    backoff_seconds: [5, 15]
+  audio:
+    max_attempts: 2
+    backoff_seconds: [10, 30]
+  visual:
+    max_attempts: 2
+    backoff_seconds: [10, 30]
+  assembly:
+    max_attempts: 1
+    backoff_seconds: [5]
+  safety_qa:
+    max_attempts: 1
+    backoff_seconds: [5]
+  publishing:
+    max_attempts: 3
+    backoff_seconds: [30, 120, 300]
+
+timeouts:
+  agent_default_sec: 300
+  publish_sec: 600
+
+storage:
+  root: storage
+  raw: storage/raw
+  rendered: storage/rendered
+  archive: storage/archive
+
+qa:
+  pending_alert_hours: 24
+
+alerts:
+  enabled: true

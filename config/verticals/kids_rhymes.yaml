@@ -1,0 +1,40 @@
+slug: kids_rhymes
+display_name: Kids Rhymes
+
+script_agent:
+  system_prompt_template: prompts/kids_rhymes_script.txt
+  content_source: original_generation
+  tone: warm, playful, age-appropriate for toddlers
+  max_script_length_words: 120
+
+audio_agent:
+  type: narration
+  provider: elevenlabs
+  style_prompt: clear cheerful kids-narration voice, gentle pacing
+  voice_id: null
+
+visual_agent:
+  type: fixed_rig
+  rig_path: rigs/kids_rhymes
+
+assembly_agent:
+  intro_template: rigs/kids_rhymes/intro.mp4
+  outro_template: rigs/kids_rhymes/outro.mp4
+  caption_style: large_yellow_kids
+  target_resolution: "1080x1920"
+  target_duration_sec_max: 60
+
+publishing_agent:
+  platforms: [youtube]
+  youtube_made_for_kids: true
+  youtube_category: Education
+  posting_cadence: "1/day"
+
+safety_qa:
+  human_review_required: true
+  classifier_thresholds:
+    violence: 0.05
+    sexual_content: 0.01
+    hate: 0.01
+    self_harm: 0.01
+    brand_safety: 0.2

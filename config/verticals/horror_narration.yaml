@@ -1,0 +1,40 @@
+slug: horror_narration
+display_name: Horror Narration
+
+script_agent:
+  system_prompt_template: prompts/horror_narration_script.txt
+  content_source: original_generation
+  tone: atmospheric, suspenseful, no gore
+  max_script_length_words: 180
+
+audio_agent:
+  type: narration
+  provider: elevenlabs
+  style_prompt: low intimate horror narration, slow pacing
+  voice_id: null
+
+visual_agent:
+  type: fixed_rig
+  rig_path: rigs/horror_narration
+
+assembly_agent:
+  intro_template: rigs/horror_narration/intro.mp4
+  outro_template: rigs/horror_narration/outro.mp4
+  caption_style: subtle_white
+  target_resolution: "1080x1920"
+  target_duration_sec_max: 60
+
+publishing_agent:
+  platforms: [youtube, instagram]
+  youtube_made_for_kids: false
+  youtube_category: Entertainment
+  posting_cadence: "1/day"
+
+safety_qa:
+  human_review_required: true
+  classifier_thresholds:
+    violence: 0.35
+    sexual_content: 0.05
+    hate: 0.05
+    self_harm: 0.05
+    brand_safety: 0.4

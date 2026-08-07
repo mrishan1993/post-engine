@@ -1,0 +1,9 @@
+# Conceptual schema documentation. Runtime validation is enforced by
+# config/schema.py (Pydantic), not by this file.
+#
+# Required top-level keys:
+#   slug, display_name
+#   script_agent, audio_agent, visual_agent
+#   assembly_agent, publishing_agent, safety_qa
+#
+# safety_qa.human_review_required MUST be true — validated in code.
