@@ -266,3 +266,228 @@ class TrendFeedback(Base):
 
     topic: Mapped[TrendTopic] = relationship(back_populates="feedback")
 
+
+# ---------------------------------------------------------------------------
+# Trend Engine V2 — Viral Intelligence (patterns, not just topics)
+# ---------------------------------------------------------------------------
+
+
+class RawContent(Base):
+    """Discovered content units from sanctioned sources (Layer 1)."""
+
+    __tablename__ = "raw_content"
+    __table_args__ = (
+        Index("idx_raw_content_source_collected", "source", "collected_at"),
+        Index("idx_raw_content_external", "source", "external_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+    external_id: Mapped[str | None] = mapped_column(String(256))
+    url: Mapped[str | None] = mapped_column(String(1024))
+    title: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
+    creator_handle: Mapped[str | None] = mapped_column(String(256))
+    platform_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    trend_signal_id: Mapped[int | None] = mapped_column(ForeignKey("trend_signals.id"))
+
+
+class ContentFeature(Base):
+    """Content DNA — structured viral features for one raw_content item."""
+
+    __tablename__ = "content_features"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    raw_content_id: Mapped[int] = mapped_column(ForeignKey("raw_content.id"), unique=True, nullable=False)
+    duration_sec: Mapped[int | None] = mapped_column(Integer)
+    hook: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    story_arc: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    emotion: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    visual_style: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    audio_style: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    editing_style: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    format: Mapped[str | None] = mapped_column(String(64))
+    audience: Mapped[str | None] = mapped_column(String(128))
+    topics: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    hashtags: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    cta: Mapped[str | None] = mapped_column(Text)
+    velocity: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    extracted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CommentSentiment(Base):
+    __tablename__ = "comment_sentiment"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    raw_content_id: Mapped[int] = mapped_column(ForeignKey("raw_content.id"), nullable=False)
+    summary: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    requests: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    questions: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    sentiment_scores: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    future_opportunities: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    analyzed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class HookLibrary(Base):
+    __tablename__ = "hook_library"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    hook_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    example_text: Mapped[str | None] = mapped_column(Text)
+    emotion: Mapped[str | None] = mapped_column(String(64))
+    source_feature_id: Mapped[int | None] = mapped_column(ForeignKey("content_features.id"))
+    use_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoryPattern(Base):
+    __tablename__ = "story_patterns"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pattern_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    beats: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    source_feature_id: Mapped[int | None] = mapped_column(ForeignKey("content_features.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class VisualPattern(Base):
+    __tablename__ = "visual_patterns"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pattern_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    features: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    meme_type: Mapped[str | None] = mapped_column(String(64))
+    source_feature_id: Mapped[int | None] = mapped_column(ForeignKey("content_features.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudioPattern(Base):
+    __tablename__ = "audio_patterns"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pattern_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    features: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    meme_type: Mapped[str | None] = mapped_column(String(64))
+    source_feature_id: Mapped[int | None] = mapped_column(ForeignKey("content_features.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class EmotionVector(Base):
+    __tablename__ = "emotion_vectors"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    raw_content_id: Mapped[int] = mapped_column(ForeignKey("raw_content.id"), nullable=False)
+    scores: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    dominant: Mapped[str | None] = mapped_column(String(64))
+    progression: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class TrendLifecycle(Base):
+    __tablename__ = "trend_lifecycle"
+    __table_args__ = (
+        Index("idx_trend_lifecycle_stage", "stage", "updated_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pattern_key: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
+    stage: Mapped[str] = mapped_column(String(32), default="emerging")
+    # emerging | growing | peak | saturated | declining | dead
+    confidence: Mapped[float] = mapped_column(Numeric(5, 3), default=0)
+    platforms: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    metrics: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class KnowledgeGraphNode(Base):
+    __tablename__ = "knowledge_graph_nodes"
+    __table_args__ = (
+        UniqueConstraint("node_type", "label", name="uq_kg_node_type_label"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    node_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    # topic | emotion | character | format | hook | audience | meme | vertical
+    label: Mapped[str] = mapped_column(String(256), nullable=False)
+    properties: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class KnowledgeGraphEdge(Base):
+    __tablename__ = "knowledge_graph_edges"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    from_node_id: Mapped[int] = mapped_column(ForeignKey("knowledge_graph_nodes.id"), nullable=False)
+    to_node_id: Mapped[int] = mapped_column(ForeignKey("knowledge_graph_nodes.id"), nullable=False)
+    relation: Mapped[str] = mapped_column(String(64), nullable=False)
+    weight: Mapped[float] = mapped_column(Numeric(6, 3), default=1.0)
+    properties: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class OpportunityScore(Base):
+    """Ranked viral content opportunity — V2 primary output unit."""
+
+    __tablename__ = "opportunity_scores"
+    __table_args__ = (
+        Index("idx_opportunity_scores_vertical", "vertical_slug", "score"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    vertical_slug: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    score: Mapped[float] = mapped_column(Numeric(6, 2), nullable=False)
+    score_breakdown: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    opportunity: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lifecycle_stage: Mapped[str | None] = mapped_column(String(32))
+    pattern_key: Mapped[str | None] = mapped_column(String(256))
+    content_brief_ids: Mapped[list[int]] = mapped_column(JSONList, default=list)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ViralPrediction(Base):
+    __tablename__ = "viral_predictions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    opportunity_id: Mapped[int] = mapped_column(ForeignKey("opportunity_scores.id"), nullable=False)
+    content_brief_id: Mapped[int | None] = mapped_column(ForeignKey("content_briefs.id"))
+    predicted_score: Mapped[float | None] = mapped_column(Numeric(6, 2))
+    actual_views: Mapped[int | None] = mapped_column(Integer)
+    actual_ctr: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    actual_watch_time_sec: Mapped[int | None] = mapped_column(Integer)
+    actual_shares: Mapped[int | None] = mapped_column(Integer)
+    actual_comments: Mapped[int | None] = mapped_column(Integer)
+    actual_subscribers: Mapped[int | None] = mapped_column(Integer)
+    recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CreatorProfile(Base):
+    __tablename__ = "creator_profiles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    platform: Mapped[str] = mapped_column(String(32), nullable=False)
+    handle: Mapped[str] = mapped_column(String(256), nullable=False)
+    display_name: Mapped[str | None] = mapped_column(String(256))
+    niche_tags: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    posting_cadence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    is_competitor: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_managed: Mapped[bool] = mapped_column(Boolean, default=False)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CompetitorChannel(Base):
+    __tablename__ = "competitor_channels"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    platform: Mapped[str] = mapped_column(String(32), nullable=False)
+    channel_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    name: Mapped[str | None] = mapped_column(String(256))
+    vertical_slugs: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    last_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+

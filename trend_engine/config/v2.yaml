@@ -1,0 +1,66 @@
+# Trend Engine V2 — Viral Intelligence config
+
+min_opportunity_score: 55
+briefs_per_opportunity: 3
+max_opportunities_per_vertical: 5
+reject_lifecycle_stages: [saturated, declining, dead]
+
+opportunity_weights:
+  virality: 0.18
+  novelty: 0.12
+  growth: 0.18
+  competition: 0.08
+  brand_fit: 0.10
+  character_fit: 0.12
+  audience_fit: 0.08
+  posting_time: 0.04
+  platform_fit: 0.05
+  historical_success: 0.05
+
+verticals:
+  kids_rhymes:
+    display_name: Kids
+    emotions_preferred: [joy, curiosity, hope]
+    formats: [rhyme, song, story_short]
+    audience: "2-8 with parents"
+  horror_narration:
+    display_name: Scary Stories
+    emotions_preferred: [fear, surprise, curiosity]
+    formats: [pov, cold_open, twist]
+    audience: "16-24"
+
+characters:
+  kids_rhymes:
+    - slug: buddy_bear
+      name: Buddy Bear
+      voice: warm cheerful
+      traits: [curious, kind, playful]
+    - slug: color_kitty
+      name: Color Kitty
+      voice: bright sing-song
+      traits: [energetic, funny]
+    - slug: count_owl
+      name: Count Owl
+      voice: gentle teacher
+      traits: [patient, smart]
+  horror_narration:
+    - slug: ghost_kid
+      name: Ghost Kid
+      voice: soft uneasy whisper
+      traits: [curious, haunted, lonely]
+    - slug: zombie_teacher
+      name: Zombie Teacher
+      voice: dry deadpan
+      traits: [ironic, slow, menacing]
+    - slug: haunted_doll
+      name: Haunted Doll
+      voice: childlike uncanny
+      traits: [sweet, wrong, obsessive]
+
+# Keyword → pattern seeds for stub/heuristic extraction
+pattern_lexicon:
+  fear: [horror, scary, ghost, haunted, whisper, door, dark, scream]
+  joy: [happy, fun, dance, smile, laugh, party, rhyme]
+  curiosity: [secret, why, mysterious, what if, never, accidentally]
+  pov: [pov, i accidentally, i should never, first person]
+  mythology: [krishna, temple, myth, epic, god, goddess]

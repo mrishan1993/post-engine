@@ -22,16 +22,17 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`) so you can exe
 
 ## Trend engine
 
-Ingests sanctioned-API signals (YouTube Data API, Google Trends), scores topics, and writes into `content_briefs` with `source='trend_engine'`.
+**V1** ranks topics. **V2** ranks viral *opportunities* (emotion, hook, story, audio/visual patterns, lifecycle, character fit) and answers: *if we publish in the next 12 hours, what should we make?*
 
 ```bash
-trend ingest          # collectors → score → content_briefs
-trend topics          # recent scored topics
-trend briefs          # pending trend-sourced briefs
-trend calibrate       # feedback-based weight suggestions
+trend ingest                              # V1 topics → content_briefs
+trend v2                                  # V2 Content DNA → opportunities → briefs
+trend what-next -v horror_narration       # next-12h recommendation
+trend opportunities -v kids_rhymes
+trend briefs --source trend_engine_v2
 ```
 
-Config: `trend_engine/config/sources.yaml`. Stubs on by default (`TREND_STUB_COLLECTORS=true` / `stub_mode: true`). Live YouTube needs `YOUTUBE_API_KEY`; Google Trends live needs `pip install -e ".[trends]"`.
+Config: `trend_engine/config/sources.yaml` (collectors), `trend_engine/config/v2.yaml` (characters, opportunity weights). Stubs on by default.
 
 ## Architecture
 
@@ -79,8 +80,10 @@ Phase-1 skeleton from PRP v3 + Trend Engine PRP v1:
 - [x] Minimal kids_rhymes + horror_narration rigs
 - [x] Trend tables + YouTube/Google Trends collectors (stub + live hooks)
 - [x] Scoring + brief generator → `content_briefs`
+- [x] V2: Content DNA, lifecycle, knowledge graph, opportunity score, character adaptation
 - [ ] Real Anthropic / ElevenLabs / Suno clients
 - [ ] Mouth-flap / Ken Burns compositors
 - [ ] YouTube OAuth upload + Instagram public-URL hosting
-- [ ] TikTok collector + LLM topic clustering
-- [ ] Feedback-loop weight calibration with real metrics
+- [ ] TikTok/Reddit collectors + multimodal meme clustering
+- [ ] LLM feature extractors (replace heuristics)
+- [ ] V3 Growth Intelligence (own-channel experiment loop)
