@@ -1,0 +1,61 @@
+# AMP Service Map — Current Code → Target Services
+
+This maps today's Phase-0 modular monolith (`post-engine`) onto AMP services.  
+Use this when extracting packages; do not invent parallel modules.
+
+| AMP Service | Current packages / modules | Notes |
+|-------------|---------------------------|--------|
+| **Trend Service** | `trend_engine/collectors/`, `processing/`, `v2/discovery.py`, `v2/features/`, `v2/patterns/`, `v2/opportunity.py`, `v2/graph.py` | Emits opportunities; stop writing briefs here long-term |
+| **Strategy Service** | `trend_engine/v2/characters.py`, `trend_engine/v2/briefs.py` (brief text/character adaptation), parts of `brief_generator/` | Owns `ContentBriefCreated`; character selection lives here |
+| **Probability Service** | `prediction/probability.py`, `features.py`, `explainability.py`, `ranking.py`, `registry.py` | Already closest to AMP shape |
+| **Prompt Service** | `prompts/`, future prompt registry; today partially inline in agents | Extract prompt assembly from agents |
+| **Generation Service** | `agents/*` (script/audio/visual/assembly), `rigs/`, `providers/{tts,music,image,llm}` | Today's content pipeline core |
+| **QA Service** | `agents/safety_qa_agent.py`, `qa/`, CLI approve/reject, `orchestration/state_machine.py` QA transitions | Must remain mandatory gate |
+| **Publishing Service** | `agents/publishing_agent.py`, `providers/{youtube,instagram}` | Needs public URL strategy for IG |
+| **Metrics Service** | `metrics/collector.py`, `metrics/reporting.py` | Expand to real platform APIs |
+| **Verification Service** | `prediction/verification.py`, `prediction/calibration.py` | Consumes metrics + predictions |
+| **Learning Service** | `prediction/learning.py`, trend feedback calibrator | Phase-3; keep thin until data volume |
+
+## Shared platform (current → target)
+
+| Platform capability | Current | Target (`amp_platform/`) |
+|---------------------|---------|--------------------------|
+| Config | `config/` | `shared/config` + amp loaders |
+| Providers | `providers/` | `amp_platform/providers` |
+| Events | in-process bus | `amp_platform/events` → Redis Streams |
+| Artifacts | `storage/` paths ad hoc | `amp_platform/artifacts` |
+| Prompts | `prompts/*.txt` | `amp_platform/prompts` |
+| Models | direct provider classes | `amp_platform/models` ModelManager |
+| Auth | `.env` secrets | `amp_platform/auth` |
+| DB | `db/` | `shared/database` (same schemas initially) |
+| Orchestration | `orchestration/` | Temporal later; keep DAG until then |
+| Observability | `monitoring/` | Langfuse/Sentry/Prom later |
+
+## Event ownership today (Phase-0)
+
+Until services are split, the in-process bus in `amp_platform/events/` is the source of truth for event names/payloads. Publishers:
+
+| Event | Phase-0 publisher module |
+|-------|--------------------------|
+| `TrendOpportunityCreated` | `trend_engine/v2/pipeline.py` (after persist_opportunities) |
+| `ContentBriefCreated` | `trend_engine/v2/briefs.py` |
+| `PredictionCreated` | `prediction/registry.py` |
+| `VideoCreated` | `orchestration/pipeline.py` (assembled → qa_pending path) |
+| `VideoApproved` / `VideoRejected` | `orchestration/pipeline.py` approve/reject |
+| `VideoPublished` | `orchestration/pipeline.py` publish |
+| `MetricsUpdated` | `metrics/collector.py` |
+| `PredictionVerified` | `prediction/verification.py` |
+
+## Extraction order (recommended)
+
+1. Events + Artifact Registry (contracts)  
+2. Metrics Service (read-mostly, low coupling)  
+3. Probability / Verification (already isolated)  
+4. Trend Service  
+5. Generation + QA + Publishing (keep together until Temporal)  
+6. Strategy + Prompt (thin, after Trend emits clean opportunities)  
+7. Learning (last — needs verified volume)
+
+## Rule
+
+If a future PR adds a package that duplicates one of these services under a new name, it is **AMP-noncompliant**. Extend the mapped module or extract the mapped service.

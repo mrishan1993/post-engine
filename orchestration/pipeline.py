@@ -15,6 +15,13 @@ from agents.publishing_agent import PublishingAgent
 from agents.safety_qa_agent import SafetyQAAgent
 from agents.topic_script_agent import TopicScriptAgent
 from agents.visual_agent import VisualAgent
+from amp_platform.events import EventType, get_bus
+from amp_platform.events.types import (
+    VideoApproved,
+    VideoCreated,
+    VideoPublished,
+    VideoRejected,
+)
 from config.loader import load_global_config, load_vertical_config
 from config.schema import VerticalConfig
 from config.settings import Settings, get_settings
@@ -235,6 +242,15 @@ class Pipeline:
                 self._transition(run, target)
             brief.status = "done"
             self.session.flush()
+            get_bus().publish(
+                EventType.VIDEO_CREATED,
+                VideoCreated(
+                    video_run_id=run.id,
+                    brief_id=run.brief_id,
+                    rendered_path=run.rendered_video_path,
+                ),
+                producer="generation-service",
+            )
             return run
         except Exception as exc:  # noqa: BLE001
             run.error_log = str(exc)
@@ -282,6 +298,11 @@ class Pipeline:
         run.qa_reviewer = reviewer
         run.qa_decided_at = datetime.now(timezone.utc)
         self._transition(run, RunStatus.QA_APPROVED)
+        get_bus().publish(
+            EventType.VIDEO_APPROVED,
+            VideoApproved(video_run_id=run.id, reviewer=reviewer, qa_notes=run.qa_notes),
+            producer="qa-service",
+        )
         return run
 
     def reject(self, run_id: int, reviewer: str, reason: str) -> VideoRun:
@@ -290,6 +311,11 @@ class Pipeline:
         run.qa_notes = reason
         run.qa_decided_at = datetime.now(timezone.utc)
         self._transition(run, RunStatus.QA_REJECTED)
+        get_bus().publish(
+            EventType.VIDEO_REJECTED,
+            VideoRejected(video_run_id=run.id, reviewer=reviewer, reason=reason),
+            producer="qa-service",
+        )
         return run
 
     def publish(self, run_id: int) -> VideoRun:
@@ -302,18 +328,29 @@ class Pipeline:
         context = self._context_from_run(run, brief)
         result = self._run_agent_with_retry("publishing", run, vertical_config, context)
         pubs = result.output.get("publications", {})
-        for platform, payload in pubs.items():
-            self.session.add(
-                Publication(
-                    video_run_id=run.id,
-                    platform=platform,
-                    platform_post_id=payload.get("platform_post_id"),
-                    published_at=datetime.now(timezone.utc),
-                    platform_metadata=payload,
-                    status=payload.get("status", "published"),
-                )
+        publication_ids: list[int] = []
+        for platform_name, payload in pubs.items():
+            pub = Publication(
+                video_run_id=run.id,
+                platform=platform_name,
+                platform_post_id=payload.get("platform_post_id"),
+                published_at=datetime.now(timezone.utc),
+                platform_metadata=payload,
+                status=payload.get("status", "published"),
             )
+            self.session.add(pub)
+            self.session.flush()
+            publication_ids.append(pub.id)
         self._transition(run, RunStatus.PUBLISHED)
+        get_bus().publish(
+            EventType.VIDEO_PUBLISHED,
+            VideoPublished(
+                video_run_id=run.id,
+                platforms=list(pubs.keys()),
+                publication_ids=publication_ids,
+            ),
+            producer="publishing-service",
+        )
         return run
 
     def regen(self, run_id: int, from_status: str) -> VideoRun:

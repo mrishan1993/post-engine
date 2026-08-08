@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from amp_platform.events import reset_bus
 from config.settings import get_settings
 from db.session import init_db, reset_engine
 
@@ -20,6 +21,7 @@ def db_url(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> str:
     monkeypatch.setenv("TREND_STUB_COLLECTORS", "true")
     get_settings.cache_clear()
     reset_engine()
+    reset_bus()
 
     # Agents write under ./storage relative to CWD — point CWD storage at tmp via symlink-ish dirs.
     cwd_storage = Path("storage")

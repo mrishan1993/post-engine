@@ -48,6 +48,7 @@ packages = [
     "rigs",
     "trend_engine",
     "prediction",
+    "amp_platform",
 ]
 
 [tool.pytest.ini_options]

@@ -7,6 +7,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from amp_platform.events import EventType, get_bus
+from amp_platform.events.types import PredictionVerified
 from db.models import (
     Prediction,
     PredictionError,
@@ -117,6 +119,16 @@ def verify_prediction(
     )
     pred.status = "verified"
     session.flush()
+    get_bus().publish(
+        EventType.PREDICTION_VERIFIED,
+        PredictionVerified(
+            prediction_id=pred.id,
+            verification_id=result.id,
+            mape=float(result.mape) if result.mape is not None else None,
+            lesson=(result.explanation or {}).get("lesson"),
+        ),
+        producer="verification-service",
+    )
     return result
 
 

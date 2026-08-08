@@ -8,6 +8,8 @@ import yaml
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from amp_platform.events import EventType, get_bus
+from amp_platform.events.types import TrendOpportunityCreated
 from config.loader import load_vertical_config
 from config.settings import Settings, get_settings
 from db.models import ContentBrief, ContentFeature, OpportunityScore, RawContent
@@ -125,6 +127,23 @@ def run_v2_intelligence(
         )
         opp_rows = persist_opportunities(session, ranked)
         for row, ranked_opp in zip(opp_rows, ranked, strict=True):
+            get_bus().publish(
+                EventType.TREND_OPPORTUNITY_CREATED,
+                TrendOpportunityCreated(
+                    opportunity_id=row.id,
+                    vertical_slug=row.vertical_slug,
+                    score=float(row.score),
+                    lifecycle=row.lifecycle_stage,
+                    pattern_key=row.pattern_key,
+                    title=row.title,
+                    dna_summary={
+                        "emotion": (ranked_opp.payload or {}).get("emotion"),
+                        "story_pattern": (ranked_opp.payload or {}).get("story_pattern"),
+                        "hook_type": (ranked_opp.payload or {}).get("hook_type"),
+                    },
+                ),
+                producer="trend-service",
+            )
             briefs = generate_opportunity_briefs(
                 session,
                 row,

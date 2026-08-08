@@ -6,6 +6,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from amp_platform.events import EventType, get_bus
+from amp_platform.events.types import PredictionCreated
 from db.models import ModelVersion, Prediction, PredictionFeature
 from prediction.probability import PredictionResult, predict_opportunity
 
@@ -74,6 +76,21 @@ class PredictionRegistry:
                 )
             )
         self.session.flush()
+        get_bus().publish(
+            EventType.PREDICTION_CREATED,
+            PredictionCreated(
+                prediction_id=row.id,
+                brief_id=content_brief_id,
+                opportunity_id=opportunity_id,
+                vertical_slug=vertical_slug,
+                virality_probability=float(result.virality_probability),
+                expected_views=int(result.predicted_views),
+                confidence=float(result.confidence),
+                final_opportunity_score=float(result.final_opportunity_score),
+                model_version=result.model_version,
+            ),
+            producer="probability-service",
+        )
         return row
 
     def predict_and_record(

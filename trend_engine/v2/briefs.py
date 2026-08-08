@@ -5,6 +5,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from amp_platform.events import EventType, get_bus
+from amp_platform.events.types import ContentBriefCreated
 from db.models import ContentBrief, OpportunityScore, Vertical, ViralPrediction
 from prediction.explainability import format_explanation
 from prediction.registry import PredictionRegistry
@@ -68,6 +70,19 @@ def generate_opportunity_briefs(
                 content_brief_id=brief.id,
                 predicted_score=result.final_opportunity_score,
             )
+        )
+        get_bus().publish(
+            EventType.CONTENT_BRIEF_CREATED,
+            ContentBriefCreated(
+                brief_id=brief.id,
+                vertical_slug=ranked.vertical_slug,
+                priority=brief.priority,
+                source="trend_engine_v2",
+                opportunity_id=opportunity_row.id,
+                character_slug=item.get("character_slug"),
+                prediction_id=pred_row.id,
+            ),
+            producer="strategy-service",
         )
         prediction_summaries.append(
             {
