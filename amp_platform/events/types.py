@@ -18,6 +18,12 @@ class EventType(StrEnum):
     METRICS_UPDATED = "amp.metrics.updated.v1"
     PREDICTION_VERIFIED = "amp.verification.prediction_verified.v1"
     MODEL_UPDATED = "amp.learning.model_updated.v1"
+    ASSET_CREATED = "amp.asset.created.v1"
+    CHARACTER_CREATED = "amp.asset.character_created.v1"
+    CHARACTER_VERSIONED = "amp.asset.character_versioned.v1"
+    GENERATION_CONTEXT_RESOLVED = "amp.asset.generation_context_resolved.v1"
+    STORY_CREATED = "amp.story.created.v1"
+    STORY_APPROVED = "amp.story.approved.v1"
 
 
 class TrendOpportunityCreated(BaseModel):
@@ -89,3 +95,16 @@ class PredictionVerified(BaseModel):
     verification_id: int
     mape: float | None = None
     lesson: str | None = None
+
+
+class StoryCreated(BaseModel):
+    story_id: str
+    title: str | None = None
+    quality_score: float = 0.0
+    platform: str | None = None
+    candidate_index: int = 0
+
+
+class StoryApproved(BaseModel):
+    story_id: str
+    quality_score: float = 0.0

@@ -29,6 +29,8 @@ trends = [
 pipeline = "cli.main:app"
 trend = "trend_engine.cli.main:app"
 predict = "prediction.cli:app"
+assets = "asset_engine.cli:app"
+story = "story_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -49,6 +51,8 @@ packages = [
     "trend_engine",
     "prediction",
     "amp_platform",
+    "asset_engine",
+    "story_engine",
 ]
 
 [tool.pytest.ini_options]

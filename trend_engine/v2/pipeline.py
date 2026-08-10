@@ -110,7 +110,7 @@ def run_v2_intelligence(
 
     for slug in target_verticals:
         vcfg = vertical_cfgs.get(slug) or {}
-        characters = (cfg.get("characters") or {}).get(slug) or []
+        characters = _load_characters(session, slug, cfg)
         # Filter pairs that fit vertical emotion/audience loosely
         relevant = _filter_for_vertical(pairs, slug, vcfg)
         edges += build_graph_from_features(session, relevant, vertical_slug=slug)
@@ -160,6 +160,24 @@ def run_v2_intelligence(
     result.opportunity_rows = all_opps
     result.briefs_created = all_briefs
     return result
+
+
+def _load_characters(session, vertical_slug: str, cfg: dict[str, Any]) -> list[dict[str, Any]]:
+    """Prefer Asset Engine characters; fall back to v2.yaml stubs."""
+    try:
+        from asset_engine.characters import CharacterRegistry
+
+        reg = CharacterRegistry(session)
+        rows = [
+            reg.to_adaptation_dict(c)
+            for c in reg.list_characters(status="active")
+            if vertical_slug in (c.tags or [])
+        ]
+        if rows:
+            return rows
+    except Exception:  # noqa: BLE001
+        pass
+    return list((cfg.get("characters") or {}).get(vertical_slug) or [])
 
 
 def _filter_for_vertical(

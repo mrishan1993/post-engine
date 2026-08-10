@@ -76,6 +76,9 @@ Workflow *coordination* still goes through the event bus / orchestrator, not ad-
 | 8 | **Metrics Service** | Poll YT/IG/TikTok | schedule | `MetricsUpdated` |
 | 9 | **Verification Service** | Predicted vs actual | `MetricsUpdated` + prediction linkage | `PredictionVerified` |
 | 10 | **Learning Service** | Weights, embeddings, KG, models | `PredictionVerified` | `ModelUpdated` / internal state |
+| — | **Asset Engine** (shared capability) | Characters, worlds, props, styles, voices, references, memory, resolution | resolve requests from Strategy/Prompt/Generation | `AssetCreated`, `CharacterCreated`, `GenerationContextResolved` |
+
+Asset Engine is not a workflow stage between Trend and Publish; it is a **shared creative-identity substrate** that Strategy/Prompt/Generation call (via SDK today, events later) to resolve generation context. See PRP: Asset & Character Management Engine.
 
 ### Service invariants
 

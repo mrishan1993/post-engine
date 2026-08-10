@@ -632,3 +632,288 @@ class PredictionLesson(Base):
     lesson: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+
+# ---------------------------------------------------------------------------
+# Asset & Character Management Engine (AMP)
+# Identity ≠ Representation; provider-agnostic creative entities
+# ---------------------------------------------------------------------------
+
+
+class Universe(Base):
+    __tablename__ = "universes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    rules: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Character(Base):
+    __tablename__ = "characters"
+    __table_args__ = (Index("idx_characters_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    universe_id: Mapped[str | None] = mapped_column(ForeignKey("universes.id"))
+    canonical_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    current_version: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    # draft | approved | active | deprecated | archived
+    tags: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CharacterVersion(Base):
+    __tablename__ = "character_versions"
+    __table_args__ = (UniqueConstraint("character_id", "version", name="uq_character_version"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    canonical_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    change_log: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class VoiceProfile(Base):
+    """Voice identity separate from TTS provider mapping."""
+
+    __tablename__ = "voice_profiles"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    characteristics: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider_mappings: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CreativeStyle(Base):
+    __tablename__ = "creative_styles"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    configuration: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Asset(Base):
+    """Provider-agnostic asset registry — identity ≠ which generator made it."""
+
+    __tablename__ = "assets"
+    __table_args__ = (
+        Index("idx_assets_type_status", "asset_type", "status"),
+        Index("idx_assets_name", "name"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    asset_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    # character_reference | face_reference | location | prop | style_ref |
+    # voice_sample | music | sfx | motion_reference | generation_reference | other
+    name: Mapped[str | None] = mapped_column(String(256))
+    storage_uri: Mapped[str | None] = mapped_column(Text)
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    # embedding stored as JSON list until pgvector migration (Phase 3)
+    embedding: Mapped[list[float] | None] = mapped_column(JSON)
+    tags: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    provider_asset_id: Mapped[str | None] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    parent_asset_id: Mapped[str | None] = mapped_column(ForeignKey("assets.id"))
+    quality: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    owner: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AssetRelationship(Base):
+    __tablename__ = "asset_relationships"
+    __table_args__ = (
+        Index("idx_asset_rel_source", "source_id", "relationship_type"),
+        Index("idx_asset_rel_target", "target_id", "relationship_type"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    source_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    # character | asset | universe | style | voice | scene
+    source_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    target_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    relationship_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    # has_voice | has_reference | belongs_to_universe | contains_character |
+    # contains_prop | knows_character | uses_style | ...
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Scene(Base):
+    __tablename__ = "scenes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    story_id: Mapped[str | None] = mapped_column(String(36))
+    sequence_number: Mapped[int | None] = mapped_column(Integer)
+    scene_config: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CreativeConfiguration(Base):
+    """Composable scene config — does not mutate character identity."""
+
+    __tablename__ = "creative_configurations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(256))
+    configuration: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AssetPack(Base):
+    __tablename__ = "asset_packs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    owner_type: Mapped[str | None] = mapped_column(String(64))
+    # character | universe | vertical | campaign
+    owner_id: Mapped[str | None] = mapped_column(String(36))
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AssetPackMember(Base):
+    __tablename__ = "asset_pack_members"
+    __table_args__ = (UniqueConstraint("pack_id", "asset_id", name="uq_pack_asset"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    pack_id: Mapped[str] = mapped_column(ForeignKey("asset_packs.id"), nullable=False)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), nullable=False)
+    role: Mapped[str | None] = mapped_column(String(64))
+    # face_reference | full_body | voice | expression | clothing | prompt_rules
+
+
+class CharacterMemory(Base):
+    __tablename__ = "character_memory"
+    __table_args__ = (Index("idx_character_memory_char", "character_id", "episode_key"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    episode_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    memory_text: Mapped[str] = mapped_column(Text, nullable=False)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UniverseMemory(Base):
+    __tablename__ = "universe_memory"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    memory_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    memory_text: Mapped[str] = mapped_column(Text, nullable=False)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AssetPerformance(Base):
+    """Attribution rollup — asset → posts → metrics (Phase 6)."""
+
+    __tablename__ = "asset_performance"
+    __table_args__ = (Index("idx_asset_perf", "asset_id", "updated_at"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), nullable=False)
+    character_id: Mapped[str | None] = mapped_column(ForeignKey("characters.id"))
+    posts_count: Mapped[int] = mapped_column(Integer, default=0)
+    avg_views: Mapped[float | None] = mapped_column(Numeric(14, 2))
+    avg_retention: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    total_views: Mapped[int] = mapped_column(Integer, default=0)
+    metrics_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Story Engine — narrative blueprints (not video/prose generation)
+# ---------------------------------------------------------------------------
+
+
+class Story(Base):
+    __tablename__ = "stories"
+    __table_args__ = (Index("idx_stories_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    title: Mapped[str | None] = mapped_column(String(256))
+    logline: Mapped[str | None] = mapped_column(Text)
+    story_type: Mapped[str | None] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    # draft | scored | approved | rejected | in_production
+    target_duration_sec: Mapped[int | None] = mapped_column(Integer)
+    blueprint: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    quality_score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    originality_score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    current_version: Mapped[int] = mapped_column(Integer, default=1)
+    opportunity_id: Mapped[int | None] = mapped_column(Integer)
+    content_brief_id: Mapped[int | None] = mapped_column(ForeignKey("content_briefs.id"))
+    character_ids: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    platform: Mapped[str | None] = mapped_column(String(64))
+    prediction_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoryVersion(Base):
+    __tablename__ = "story_versions"
+    __table_args__ = (UniqueConstraint("story_id", "version", name="uq_story_version"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id"), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    blueprint: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    critic_result: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    quality_score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class NarrativePattern(Base):
+    """Reusable narrative structures owned by Story Engine (distinct from Trend V2 story_patterns)."""
+
+    __tablename__ = "narrative_patterns"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    pattern_type: Mapped[str | None] = mapped_column(String(64))
+    structure: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    embedding: Mapped[list[float] | None] = mapped_column(JSON)
+    performance_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoryPerformance(Base):
+    __tablename__ = "story_performance"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id"), nullable=False)
+    post_id: Mapped[str | None] = mapped_column(String(36))
+    video_run_id: Mapped[int | None] = mapped_column(ForeignKey("video_runs.id"))
+    views: Mapped[int | None] = mapped_column(Integer)
+    retention: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    engagement_rate: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    share_rate: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    comment_rate: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    follower_conversion: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    component_scores: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

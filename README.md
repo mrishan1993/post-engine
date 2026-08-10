@@ -33,6 +33,8 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `pipeline` | Generation + QA + publish |
 | `trend` | Trend V1/V2 opportunities → briefs |
 | `predict` | Probability registry, verify, calibrate, rank |
+| `assets` | Characters, asset registry, scene resolve |
+| `story` | Story blueprints (hook→CTA architecture, critic loop) |
 
 ```bash
 trend v2 -v horror_narration
@@ -40,6 +42,14 @@ trend what-next -v horror_narration
 predict list
 predict rank -v horror_narration
 predict verify <id> --views 190000
+
+assets seed
+assets characters
+assets resolve -c ghost_kid --location "Haunted School" --emotion scared --prop Flashlight --style cinematic_horror
+
+story generate -t "POV horror" -c ghost_kid -n 3 --approve-winner
+story show <story_id>
+story patterns --seed
 ```
 
 ## Repo layout (AMP-aligned)
@@ -50,6 +60,8 @@ predict verify <id> --views 190000
 | `amp_platform/` | Events, artifacts (shared platform layer) |
 | `trend_engine/` | → Trend + Strategy services |
 | `prediction/` | → Probability + Verification + Learning |
+| `asset_engine/` | → Asset & Character Management Engine |
+| `story_engine/` | → Story Engine (blueprints only; not video/prompts) |
 | `agents/`, `rigs/`, `orchestration/` | → Generation + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |
@@ -75,6 +87,8 @@ pytest
 - [x] Content pipeline + QA gate
 - [x] Trend Engine V1/V2
 - [x] Probability + Verification engines
+- [x] Asset & Character Engine (registry, versions, resolve, seed)
+- [x] Story Engine (schema, generator, critic/revise, patterns, CLI)
 - [ ] Redis Streams / Temporal extraction
 - [ ] Real provider clients (Anthropic, ElevenLabs, YouTube OAuth, …)
 - [ ] Prompt + Model registries

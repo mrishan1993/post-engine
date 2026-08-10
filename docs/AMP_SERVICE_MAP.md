@@ -15,6 +15,8 @@ Use this when extracting packages; do not invent parallel modules.
 | **Metrics Service** | `metrics/collector.py`, `metrics/reporting.py` | Expand to real platform APIs |
 | **Verification Service** | `prediction/verification.py`, `prediction/calibration.py` | Consumes metrics + predictions |
 | **Learning Service** | `prediction/learning.py`, trend feedback calibrator | Phase-3; keep thin until data volume |
+| **Asset Engine** | `asset_engine/` (characters, assets, resolver, memory) | Underpins Strategy + Generation; not a video generator |
+| **Story Engine** | `story_engine/` (schemas, generator, critic, patterns, service) | Narrative blueprints only; feeds Storyboard (future); uses Asset canon + Probability hints |
 
 ## Shared platform (current → target)
 
@@ -45,6 +47,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `VideoPublished` | `orchestration/pipeline.py` publish |
 | `MetricsUpdated` | `metrics/collector.py` |
 | `PredictionVerified` | `prediction/verification.py` |
+| `StoryCreated` / `StoryApproved` | `story_engine/service.py` |
 
 ## Extraction order (recommended)
 
