@@ -120,6 +120,7 @@ class StoryboardService:
             ),
             max_revisions=max_revisions,
         )
+        doc = self._remint_ids(doc)
         # Immutable versions: create new row
         new_version = int(board.version) + 1
         new_board = Storyboard(
@@ -191,6 +192,16 @@ class StoryboardService:
         if not rows:
             return 1
         return max(int(r.version) for r in rows) + 1
+
+    @staticmethod
+    def _remint_ids(doc: StoryboardDocument) -> StoryboardDocument:
+        """Allocate fresh scene/shot IDs for immutable new versions."""
+        data = doc.model_copy(deep=True)
+        for sc in data.scenes:
+            sc.id = f"scene_{uuid4().hex[:8]}"
+            for sh in sc.shots:
+                sh.id = f"shot_{uuid4().hex[:8]}"
+        return data
 
     def _persist_children(self, board: Storyboard, doc: StoryboardDocument) -> None:
         for sc in doc.scenes:

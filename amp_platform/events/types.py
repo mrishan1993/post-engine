@@ -127,3 +127,18 @@ class StoryboardApproved(BaseModel):
     story_id: str
     version: int = 1
     quality_score: float = 0.0
+
+
+class PromptPackCreated(BaseModel):
+    prompt_package_id: str
+    prompt_spec_id: str | None = None
+    provider: str | None = None
+    model: str | None = None
+    modality: str | None = None
+    quality_score: float = 0.0
+    storyboard_id: str | None = None
+    storyboard_shot_id: str | None = None
+    story_id: str | None = None
+    brief_id: int | None = None
+    prediction_id: int | None = None
+    prompt_artifact_ids: list[str] = Field(default_factory=list)

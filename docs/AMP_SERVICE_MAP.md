@@ -8,7 +8,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Trend Service** | `trend_engine/collectors/`, `processing/`, `v2/discovery.py`, `v2/features/`, `v2/patterns/`, `v2/opportunity.py`, `v2/graph.py` | Emits opportunities; stop writing briefs here long-term |
 | **Strategy Service** | `trend_engine/v2/characters.py`, `trend_engine/v2/briefs.py` (brief text/character adaptation), parts of `brief_generator/` | Owns `ContentBriefCreated`; character selection lives here |
 | **Probability Service** | `prediction/probability.py`, `features.py`, `explainability.py`, `ranking.py`, `registry.py` | Already closest to AMP shape |
-| **Prompt Service** | `prompts/`, future prompt registry; today partially inline in agents | Extract prompt assembly from agents |
+| **Prompt Service** | `prompt_engine/` (CGS, compiler, adapters, critic); legacy `prompts/*.txt` in agents | Compiles storyboard→provider packages; does not generate media |
 | **Generation Service** | `agents/*` (script/audio/visual/assembly), `rigs/`, `providers/{tts,music,image,llm}` | Today's content pipeline core |
 | **QA Service** | `agents/safety_qa_agent.py`, `qa/`, CLI approve/reject, `orchestration/state_machine.py` QA transitions | Must remain mandatory gate |
 | **Publishing Service** | `agents/publishing_agent.py`, `providers/{youtube,instagram}` | Needs public URL strategy for IG |
@@ -18,6 +18,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Asset Engine** | `asset_engine/` (characters, assets, resolver, memory) | Underpins Strategy + Generation; not a video generator |
 | **Story Engine** | `story_engine/` (schemas, generator, critic, patterns, service) | Narrative blueprints only; feeds Storyboard; uses Asset canon + Probability hints |
 | **Storyboard Engine** | `storyboard_engine/` (scenes, shots, audio, continuity, critic) | Visual/audio contract for Prompt/Generation; never emits provider prompts |
+| **Prompt Engine** | `prompt_engine/` (CGS, components, registry, adapters, critic) | Translator only; creative truth stays in Story/Storyboard/Asset |
 
 ## Shared platform (current → target)
 
@@ -50,6 +51,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `PredictionVerified` | `prediction/verification.py` |
 | `StoryCreated` / `StoryApproved` | `story_engine/service.py` |
 | `StoryboardCreated` / `StoryboardApproved` | `storyboard_engine/service.py` |
+| `PromptPackCreated` | `prompt_engine/service.py` |
 
 ## Extraction order (recommended)
 

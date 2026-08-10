@@ -36,6 +36,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `assets` | Characters, asset registry, scene resolve |
 | `story` | Story blueprints (hook→CTA architecture, critic loop) |
 | `storyboard` | Time-coded scenes/shots/audio specs (not prompts/video) |
+| `prompt` | CGS → provider prompt packages (compiler; no media) |
 
 ```bash
 trend v2 -v horror_narration
@@ -55,6 +56,11 @@ story patterns --seed
 storyboard generate -c ghost_kid --approve
 storyboard scenes <storyboard_id>
 storyboard show <storyboard_id>
+
+prompt compile --bootstrap -c ghost_kid -p veo
+prompt compile -b <storyboard_id> --all
+prompt providers -m video
+prompt show <package_id>
 ```
 
 ## Repo layout (AMP-aligned)
@@ -68,6 +74,7 @@ storyboard show <storyboard_id>
 | `asset_engine/` | → Asset & Character Management Engine |
 | `story_engine/` | → Story Engine (blueprints only; not video/prompts) |
 | `storyboard_engine/` | → Storyboard Engine (scenes/shots/audio; not generation) |
+| `prompt_engine/` | → Prompt Engine (CGS + provider adapters; not generation) |
 | `agents/`, `rigs/`, `orchestration/` | → Generation + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |
@@ -96,7 +103,7 @@ pytest
 - [x] Asset & Character Engine (registry, versions, resolve, seed)
 - [x] Story Engine (schema, generator, critic/revise, patterns, CLI)
 - [x] Storyboard Engine (scenes/shots/audio, critic, assets, CLI)
+- [x] Prompt Engine (CGS, adapters, critic, experiments, CLI)
 - [ ] Redis Streams / Temporal extraction
 - [ ] Real provider clients (Anthropic, ElevenLabs, YouTube OAuth, …)
-- [ ] Prompt + Model registries
 - [ ] Dashboard / API gateway

@@ -987,3 +987,66 @@ class StoryboardAsset(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Prompt Engine — CGS + provider packages (never generates media)
+# ---------------------------------------------------------------------------
+
+
+class PromptSpec(Base):
+    __tablename__ = "prompt_specs"
+    __table_args__ = (Index("idx_prompt_specs_modality", "modality"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    modality: Mapped[str] = mapped_column(String(32), nullable=False)
+    canonical_spec: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    storyboard_shot_id: Mapped[str | None] = mapped_column(String(64))
+    story_id: Mapped[str | None] = mapped_column(ForeignKey("stories.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PromptPackage(Base):
+    __tablename__ = "prompt_packages"
+    __table_args__ = (Index("idx_prompt_packages_provider", "provider"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    prompt_spec_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_specs.id"))
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    modality: Mapped[str | None] = mapped_column(String(32))
+    provider_prompt: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    quality_score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    estimated_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    estimated_latency_sec: Mapped[float | None] = mapped_column(Numeric(10, 3))
+    validation_result: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    critic_result: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="compiled")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PromptComponent(Base):
+    __tablename__ = "prompt_components"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    component_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    content: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    performance_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PromptExperiment(Base):
+    __tablename__ = "prompt_experiments"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    storyboard_shot_id: Mapped[str | None] = mapped_column(String(64))
+    variants: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    selected_variant: Mapped[str | None] = mapped_column(String(36))
+    results: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
