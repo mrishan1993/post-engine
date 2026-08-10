@@ -24,6 +24,8 @@ class EventType(StrEnum):
     GENERATION_CONTEXT_RESOLVED = "amp.asset.generation_context_resolved.v1"
     STORY_CREATED = "amp.story.created.v1"
     STORY_APPROVED = "amp.story.approved.v1"
+    STORYBOARD_CREATED = "amp.storyboard.created.v1"
+    STORYBOARD_APPROVED = "amp.storyboard.approved.v1"
 
 
 class TrendOpportunityCreated(BaseModel):
@@ -107,4 +109,21 @@ class StoryCreated(BaseModel):
 
 class StoryApproved(BaseModel):
     story_id: str
+    quality_score: float = 0.0
+
+
+class StoryboardCreated(BaseModel):
+    storyboard_id: str
+    story_id: str
+    version: int = 1
+    scene_count: int = 0
+    shot_count: int = 0
+    duration_sec: float = 0.0
+    quality_score: float = 0.0
+
+
+class StoryboardApproved(BaseModel):
+    storyboard_id: str
+    story_id: str
+    version: int = 1
     quality_score: float = 0.0

@@ -917,3 +917,73 @@ class StoryPerformance(Base):
     captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Storyboard Engine — visual/audio specs (not generation / prompts)
+# ---------------------------------------------------------------------------
+
+
+class Storyboard(Base):
+    __tablename__ = "storyboards"
+    __table_args__ = (
+        UniqueConstraint("story_id", "version", name="uq_storyboard_story_version"),
+        Index("idx_storyboards_status", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id"), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    platform: Mapped[str | None] = mapped_column(String(64))
+    duration_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    global_direction: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    document: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    quality_score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    # draft | scored | approved | rejected
+    critic_result: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    prediction_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    story_version: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoryboardScene(Base):
+    __tablename__ = "storyboard_scenes"
+    __table_args__ = (Index("idx_storyboard_scenes_board", "storyboard_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    storyboard_id: Mapped[str] = mapped_column(ForeignKey("storyboards.id"), nullable=False)
+    sequence_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    start_time_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    end_time_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    narrative_function: Mapped[str | None] = mapped_column(String(64))
+    emotional_state: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    scene_config: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoryboardShot(Base):
+    __tablename__ = "storyboard_shots"
+    __table_args__ = (Index("idx_storyboard_shots_scene", "scene_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    scene_id: Mapped[str] = mapped_column(ForeignKey("storyboard_scenes.id"), nullable=False)
+    sequence_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    start_time_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    end_time_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    shot_config: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    generation_config: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoryboardAsset(Base):
+    __tablename__ = "storyboard_assets"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    storyboard_id: Mapped[str] = mapped_column(ForeignKey("storyboards.id"), nullable=False)
+    shot_id: Mapped[str | None] = mapped_column(ForeignKey("storyboard_shots.id"))
+    asset_id: Mapped[str | None] = mapped_column(String(36))
+    asset_role: Mapped[str | None] = mapped_column(String(64))
+    required: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

@@ -31,6 +31,7 @@ trend = "trend_engine.cli.main:app"
 predict = "prediction.cli:app"
 assets = "asset_engine.cli:app"
 story = "story_engine.cli:app"
+storyboard = "storyboard_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -53,6 +54,7 @@ packages = [
     "amp_platform",
     "asset_engine",
     "story_engine",
+    "storyboard_engine",
 ]
 
 [tool.pytest.ini_options]

@@ -35,6 +35,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `predict` | Probability registry, verify, calibrate, rank |
 | `assets` | Characters, asset registry, scene resolve |
 | `story` | Story blueprints (hook→CTA architecture, critic loop) |
+| `storyboard` | Time-coded scenes/shots/audio specs (not prompts/video) |
 
 ```bash
 trend v2 -v horror_narration
@@ -50,6 +51,10 @@ assets resolve -c ghost_kid --location "Haunted School" --emotion scared --prop 
 story generate -t "POV horror" -c ghost_kid -n 3 --approve-winner
 story show <story_id>
 story patterns --seed
+
+storyboard generate -c ghost_kid --approve
+storyboard scenes <storyboard_id>
+storyboard show <storyboard_id>
 ```
 
 ## Repo layout (AMP-aligned)
@@ -62,6 +67,7 @@ story patterns --seed
 | `prediction/` | → Probability + Verification + Learning |
 | `asset_engine/` | → Asset & Character Management Engine |
 | `story_engine/` | → Story Engine (blueprints only; not video/prompts) |
+| `storyboard_engine/` | → Storyboard Engine (scenes/shots/audio; not generation) |
 | `agents/`, `rigs/`, `orchestration/` | → Generation + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |
@@ -89,6 +95,7 @@ pytest
 - [x] Probability + Verification engines
 - [x] Asset & Character Engine (registry, versions, resolve, seed)
 - [x] Story Engine (schema, generator, critic/revise, patterns, CLI)
+- [x] Storyboard Engine (scenes/shots/audio, critic, assets, CLI)
 - [ ] Redis Streams / Temporal extraction
 - [ ] Real provider clients (Anthropic, ElevenLabs, YouTube OAuth, …)
 - [ ] Prompt + Model registries
