@@ -61,6 +61,16 @@ class EventType(StrEnum):
     IMAGE_TECHNICAL_QA_COMPLETED = "amp.image.technical_qa_completed.v1"
     IMAGE_EDITED = "amp.image.edited.v1"
     IMAGE_VERSION_CREATED = "amp.image.version_created.v1"
+    MUSIC_GENERATION_REQUESTED = "amp.music.generation_requested.v1"
+    MUSIC_GENERATION_STARTED = "amp.music.generation_started.v1"
+    MUSIC_GENERATION_COMPLETED = "amp.music.generation_completed.v1"
+    MUSIC_GENERATION_FAILED = "amp.music.generation_failed.v1"
+    MUSIC_GENERATION_FALLBACK = "amp.music.generation_fallback.v1"
+    MUSIC_ARTIFACT_CREATED = "amp.music.artifact_created.v1"
+    SFX_REQUESTED = "amp.music.sfx_requested.v1"
+    SFX_SELECTED = "amp.music.sfx_selected.v1"
+    AUDIO_TIMELINE_CREATED = "amp.music.audio_timeline_created.v1"
+    AUDIO_QUALITY_VALIDATED = "amp.music.audio_quality_validated.v1"
 
 
 class TrendOpportunityCreated(BaseModel):

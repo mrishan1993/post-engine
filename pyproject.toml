@@ -36,6 +36,7 @@ prompt = "prompt_engine.cli:app"
 generate = "generation_engine.cli:app"
 videogen = "video_generation_engine.cli:app"
 imagegen = "image_generation_engine.cli:app"
+musicgen = "music_sfx_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -63,6 +64,7 @@ packages = [
     "generation_engine",
     "video_generation_engine",
     "image_generation_engine",
+    "music_sfx_engine",
 ]
 
 [tool.pytest.ini_options]

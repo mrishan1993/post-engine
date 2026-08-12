@@ -40,6 +40,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `generate` | Execute PromptPackages → local stub media artifacts |
 | `videogen` | Video-specialized path (refs, duration strategy, tech QA) |
 | `imagegen` | Image-specialized path (keyframes, refs, edits, tech QA) |
+| `musicgen` | Music & SFX (blueprint, library SFX, timeline) |
 
 ```bash
 trend v2 -v horror_narration
@@ -78,6 +79,11 @@ imagegen run --bootstrap -c ghost_kid -n 2 --provider provider_a --purpose story
 imagegen artifacts <request_id>
 imagegen edit <artifact_id> -i "soften expression, keep identity"
 imagegen providers
+
+musicgen run --bootstrap -c ghost_kid --provider provider_a
+musicgen timeline <request_id>
+musicgen sfx-search door
+musicgen providers
 ```
 
 ## Repo layout (AMP-aligned)
@@ -95,6 +101,7 @@ imagegen providers
 | `generation_engine/` | → Generation Engine (jobs/router/artifacts; stub providers) |
 | `video_generation_engine/` | → Video Generation Engine (clips, refs, technical QA) |
 | `image_generation_engine/` | → Image Generation Engine (keyframes, refs, edits, tech QA) |
+| `music_sfx_engine/` | → Music & SFX Engine (blueprint, music, SFX library, timeline) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

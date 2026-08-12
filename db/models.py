@@ -1323,3 +1323,122 @@ class ImageArtifact(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Music & SFX Engine — blueprint, music, SFX, audio timeline
+# ---------------------------------------------------------------------------
+
+
+class MusicGenerationRequest(Base):
+    __tablename__ = "music_generation_requests"
+    __table_args__ = (
+        Index("idx_music_gen_requests_status", "status"),
+        UniqueConstraint("idempotency_key", name="uq_music_gen_idempotency"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    story_id: Mapped[str | None] = mapped_column(ForeignKey("stories.id"))
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    audio_blueprint: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    music_spec: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider_strategy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    variant_count: Mapped[int] = mapped_column(Integer, default=1)
+    budget: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    quality: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    priority: Mapped[str] = mapped_column(String(32), default="normal")
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    idempotency_key: Mapped[str | None] = mapped_column(String(256))
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MusicGenerationJob(Base):
+    __tablename__ = "music_generation_jobs"
+    __table_args__ = (Index("idx_music_gen_jobs_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    request_id: Mapped[str] = mapped_column(
+        ForeignKey("music_generation_requests.id"), nullable=False
+    )
+    variant_number: Mapped[int] = mapped_column(Integer, default=1)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    provider_job_id: Mapped[str | None] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    fallback_count: Mapped[int] = mapped_column(Integer, default=0)
+    estimated_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    actual_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    parameters: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    seed: Mapped[int | None] = mapped_column(Integer)
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AudioArtifact(Base):
+    __tablename__ = "audio_artifacts"
+    __table_args__ = (Index("idx_audio_artifacts_job", "generation_job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    generation_job_id: Mapped[str | None] = mapped_column(ForeignKey("music_generation_jobs.id"))
+    artifact_type: Mapped[str] = mapped_column(String(32), default="music")
+    storage_uri: Mapped[str] = mapped_column(Text, nullable=False)
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    duration_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    sample_rate: Mapped[int | None] = mapped_column(Integer)
+    channels: Mapped[int | None] = mapped_column(Integer)
+    loudness_lufs: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    true_peak_db: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    file_size_bytes: Mapped[int | None] = mapped_column(Integer)
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    technical_qa: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    sfx_library_id: Mapped[str | None] = mapped_column(String(64))
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SfxLibraryAsset(Base):
+    __tablename__ = "sfx_library_assets"
+    __table_args__ = (Index("idx_sfx_library_category", "category"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    category: Mapped[str] = mapped_column(String(64), nullable=False)
+    subtype: Mapped[str | None] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    duration_sec: Mapped[float] = mapped_column(Numeric(8, 3), default=1.0)
+    intensity: Mapped[float] = mapped_column(Numeric(4, 3), default=0.7)
+    tags: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    storage_uri: Mapped[str | None] = mapped_column(Text)
+    licensed: Mapped[bool] = mapped_column(Boolean, default=True)
+    reuse_count: Mapped[int] = mapped_column(Integer, default=0)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudioTimelineRow(Base):
+    __tablename__ = "audio_timelines"
+    __table_args__ = (Index("idx_audio_timelines_storyboard", "storyboard_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    music_request_id: Mapped[str | None] = mapped_column(ForeignKey("music_generation_requests.id"))
+    duration_sec: Mapped[float] = mapped_column(Numeric(8, 3), nullable=False)
+    tracks: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False)
+    beat_grid: Mapped[list[float] | None] = mapped_column(JSON)
+    voice_windows: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON)
+    ducking: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    loudness_profile: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="ready")
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

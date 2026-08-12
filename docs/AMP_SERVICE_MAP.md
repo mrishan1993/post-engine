@@ -9,7 +9,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Strategy Service** | `trend_engine/v2/characters.py`, `trend_engine/v2/briefs.py` (brief text/character adaptation), parts of `brief_generator/` | Owns `ContentBriefCreated`; character selection lives here |
 | **Probability Service** | `prediction/probability.py`, `features.py`, `explainability.py`, `ranking.py`, `registry.py` | Already closest to AMP shape |
 | **Prompt Service** | `prompt_engine/` (CGS, compiler, adapters, critic); legacy `prompts/*.txt` in agents | Compiles storyboard→provider packages; does not generate media |
-| **Generation Service** | `generation_engine/` + `video_generation_engine/` + `image_generation_engine/`; legacy `agents/*` | Multi-modal generation + P0 video/image specialized paths |
+| **Generation Service** | `generation_engine/` + `video_generation_engine/` + `image_generation_engine/` + `music_sfx_engine/`; legacy `agents/*` | Multi-modal generation + P0 video/image/music specialized paths |
 | **QA Service** | `agents/safety_qa_agent.py`, `qa/`, CLI approve/reject, `orchestration/state_machine.py` QA transitions | Must remain mandatory gate |
 | **Publishing Service** | `agents/publishing_agent.py`, `providers/{youtube,instagram}` | Needs public URL strategy for IG |
 | **Metrics Service** | `metrics/collector.py`, `metrics/reporting.py` | Expand to real platform APIs |
@@ -22,6 +22,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Generation Engine** | `generation_engine/` (requests, jobs, router, stubs, artifacts) | Boring multi-modal execution |
 | **Video Generation Engine** | `video_generation_engine/` (video requests/jobs/artifacts, refs, ffprobe/stub QA) | P0 clip path; provider-agnostic; does not invent creative intent |
 | **Image Generation Engine** | `image_generation_engine/` (image requests/jobs/artifacts, refs, edits, stub QA) | P0 keyframe/thumbnail/cover path; shares generation platform primitives with video |
+| **Music & SFX Engine** | `music_sfx_engine/` (blueprint, music jobs, SFX library, audio timeline) | P0 audio path; library-first SFX; Assembly-ready timeline |
 
 ## Shared platform (current → target)
 
@@ -58,6 +59,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `GenerationRequested`…`ArtifactCreated` | `generation_engine/` |
 | `VideoGenerationRequested`…`VideoArtifactCreated` | `video_generation_engine/` |
 | `ImageGenerationRequested`…`ImageArtifactCreated` / `ImageEdited` | `image_generation_engine/` |
+| `MusicGenerationRequested`…`MusicArtifactCreated` / `SFX*` / `AudioTimelineCreated` | `music_sfx_engine/` |
 
 ## Extraction order (recommended)
 
