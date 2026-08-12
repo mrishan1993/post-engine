@@ -26,6 +26,17 @@ class EventType(StrEnum):
     STORY_APPROVED = "amp.story.approved.v1"
     STORYBOARD_CREATED = "amp.storyboard.created.v1"
     STORYBOARD_APPROVED = "amp.storyboard.approved.v1"
+    GENERATION_REQUESTED = "amp.generation.requested.v1"
+    GENERATION_QUEUED = "amp.generation.queued.v1"
+    GENERATION_STARTED = "amp.generation.started.v1"
+    GENERATION_SUBMITTED = "amp.generation.submitted.v1"
+    GENERATION_PROCESSING = "amp.generation.processing.v1"
+    GENERATION_COMPLETED = "amp.generation.completed.v1"
+    GENERATION_FAILED = "amp.generation.failed.v1"
+    GENERATION_RETRIED = "amp.generation.retried.v1"
+    GENERATION_FALLBACK = "amp.generation.fallback.v1"
+    ARTIFACT_CREATED = "amp.generation.artifact_created.v1"
+    GENERATION_QA_COMPLETED = "amp.generation.qa_completed.v1"
 
 
 class TrendOpportunityCreated(BaseModel):
@@ -142,3 +153,26 @@ class PromptPackCreated(BaseModel):
     brief_id: int | None = None
     prediction_id: int | None = None
     prompt_artifact_ids: list[str] = Field(default_factory=list)
+
+
+class GenerationRequested(BaseModel):
+    request_id: str
+    modality: str
+    variants: int = 1
+    prompt_package_id: str | None = None
+
+
+class GenerationCompleted(BaseModel):
+    job_id: str
+    artifact_id: str
+    provider: str | None = None
+    model: str | None = None
+    cost: float = 0.0
+
+
+class ArtifactCreated(BaseModel):
+    artifact_id: str
+    job_id: str
+    type: str
+    storage_uri: str | None = None
+    sha256: str | None = None

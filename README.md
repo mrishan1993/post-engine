@@ -37,6 +37,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `story` | Story blueprints (hook→CTA architecture, critic loop) |
 | `storyboard` | Time-coded scenes/shots/audio specs (not prompts/video) |
 | `prompt` | CGS → provider prompt packages (compiler; no media) |
+| `generate` | Execute PromptPackages → local stub media artifacts |
 
 ```bash
 trend v2 -v horror_narration
@@ -61,6 +62,11 @@ prompt compile --bootstrap -c ghost_kid -p veo
 prompt compile -b <storyboard_id> --all
 prompt providers -m video
 prompt show <package_id>
+
+generate run --bootstrap -c ghost_kid -n 2
+generate show <request_id>
+generate artifacts <request_id>
+generate providers
 ```
 
 ## Repo layout (AMP-aligned)
@@ -75,7 +81,8 @@ prompt show <package_id>
 | `story_engine/` | → Story Engine (blueprints only; not video/prompts) |
 | `storyboard_engine/` | → Storyboard Engine (scenes/shots/audio; not generation) |
 | `prompt_engine/` | → Prompt Engine (CGS + provider adapters; not generation) |
-| `agents/`, `rigs/`, `orchestration/` | → Generation + QA + Publishing |
+| `generation_engine/` | → Generation Engine (jobs/router/artifacts; stub providers) |
+| `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |
 
@@ -104,6 +111,7 @@ pytest
 - [x] Story Engine (schema, generator, critic/revise, patterns, CLI)
 - [x] Storyboard Engine (scenes/shots/audio, critic, assets, CLI)
 - [x] Prompt Engine (CGS, adapters, critic, experiments, CLI)
+- [x] Generation Engine (jobs, routing, retry/fallback, stub artifacts, CLI)
 - [ ] Redis Streams / Temporal extraction
 - [ ] Real provider clients (Anthropic, ElevenLabs, YouTube OAuth, …)
 - [ ] Dashboard / API gateway

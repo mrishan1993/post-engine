@@ -33,6 +33,7 @@ assets = "asset_engine.cli:app"
 story = "story_engine.cli:app"
 storyboard = "storyboard_engine.cli:app"
 prompt = "prompt_engine.cli:app"
+generate = "generation_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -57,6 +58,7 @@ packages = [
     "story_engine",
     "storyboard_engine",
     "prompt_engine",
+    "generation_engine",
 ]
 
 [tool.pytest.ini_options]

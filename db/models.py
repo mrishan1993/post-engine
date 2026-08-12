@@ -1050,3 +1050,111 @@ class PromptExperiment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Generation Engine — execute PromptPackages → media artifacts
+# ---------------------------------------------------------------------------
+
+
+class GenerationRequest(Base):
+    __tablename__ = "generation_requests"
+    __table_args__ = (Index("idx_generation_requests_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str | None] = mapped_column(String(36))
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    storyboard_shot_id: Mapped[str | None] = mapped_column(String(64))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    modality: Mapped[str] = mapped_column(String(32), nullable=False)
+    requested_variants: Mapped[int] = mapped_column(Integer, default=1)
+    priority: Mapped[str] = mapped_column(String(32), default="normal")
+    budget: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider_strategy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    quality: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    idempotency_key: Mapped[str | None] = mapped_column(String(128))
+    profile: Mapped[str | None] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class GenerationJob(Base):
+    __tablename__ = "generation_jobs"
+    __table_args__ = (Index("idx_generation_jobs_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    request_id: Mapped[str] = mapped_column(ForeignKey("generation_requests.id"), nullable=False)
+    variant_number: Mapped[int] = mapped_column(Integer, default=1)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    provider_job_id: Mapped[str | None] = mapped_column(String(256))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    seed: Mapped[int | None] = mapped_column(Integer)
+    retry_count: Mapped[int] = mapped_column(Integer, default=0)
+    fallback_count: Mapped[int] = mapped_column(Integer, default=0)
+    estimated_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    actual_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    latency: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    parameters: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    depends_on: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MediaArtifact(Base):
+    __tablename__ = "media_artifacts"
+    __table_args__ = (Index("idx_media_artifacts_job", "generation_job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    generation_job_id: Mapped[str] = mapped_column(ForeignKey("generation_jobs.id"), nullable=False)
+    artifact_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    storage_uri: Mapped[str | None] = mapped_column(Text)
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    size_bytes: Mapped[int | None] = mapped_column(Integer)
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    technical_qa: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ProviderPerformance(Base):
+    __tablename__ = "provider_performance"
+    __table_args__ = (
+        UniqueConstraint("provider", "model", "modality", name="uq_provider_perf"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(128), nullable=False)
+    model: Mapped[str | None] = mapped_column(String(128))
+    modality: Mapped[str] = mapped_column(String(32), nullable=False)
+    success_rate: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    avg_latency_ms: Mapped[int | None] = mapped_column(Integer)
+    avg_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    avg_qa_score: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    fallback_rate: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    sample_count: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ProviderReference(Base):
+    """Maps internal assets to provider-side reference IDs."""
+
+    __tablename__ = "provider_references"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    internal_asset_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    provider: Mapped[str] = mapped_column(String(128), nullable=False)
+    provider_asset_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
