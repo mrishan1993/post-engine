@@ -1158,3 +1158,168 @@ class ProviderReference(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Video Generation Engine — specialized video path (PromptPackage → clip)
+# ---------------------------------------------------------------------------
+
+
+class VideoGenerationRequest(Base):
+    __tablename__ = "video_generation_requests"
+    __table_args__ = (
+        Index("idx_video_gen_requests_status", "status"),
+        UniqueConstraint("idempotency_key", name="uq_video_gen_idempotency"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    storyboard_shot_id: Mapped[str | None] = mapped_column(String(64))
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    prompt_package_id: Mapped[str] = mapped_column(ForeignKey("prompt_packages.id"), nullable=False)
+    provider_strategy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    variant_count: Mapped[int] = mapped_column(Integer, default=1)
+    budget: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    quality: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    priority: Mapped[str] = mapped_column(String(32), default="normal")
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    idempotency_key: Mapped[str | None] = mapped_column(String(256))
+    video_prompt_package: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    duration_strategy: Mapped[str] = mapped_column(String(32), default="nearest")
+    continuity: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class VideoGenerationJob(Base):
+    __tablename__ = "video_generation_jobs"
+    __table_args__ = (Index("idx_video_gen_jobs_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    request_id: Mapped[str] = mapped_column(
+        ForeignKey("video_generation_requests.id"), nullable=False
+    )
+    variant_number: Mapped[int] = mapped_column(Integer, default=1)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    provider_job_id: Mapped[str | None] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    fallback_count: Mapped[int] = mapped_column(Integer, default=0)
+    estimated_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    actual_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    generation_parameters: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    seed: Mapped[int | None] = mapped_column(Integer)
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    depends_on: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class VideoArtifact(Base):
+    __tablename__ = "video_artifacts"
+    __table_args__ = (Index("idx_video_artifacts_job", "generation_job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    generation_job_id: Mapped[str] = mapped_column(
+        ForeignKey("video_generation_jobs.id"), nullable=False
+    )
+    storage_uri: Mapped[str] = mapped_column(Text, nullable=False)
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    duration_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    fps: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    file_size_bytes: Mapped[int | None] = mapped_column(Integer)
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    technical_qa: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Image Generation Engine — keyframes, refs, thumbnails, edits
+# ---------------------------------------------------------------------------
+
+
+class ImageGenerationRequest(Base):
+    __tablename__ = "image_generation_requests"
+    __table_args__ = (
+        Index("idx_image_gen_requests_status", "status"),
+        UniqueConstraint("idempotency_key", name="uq_image_gen_idempotency"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    purpose: Mapped[str | None] = mapped_column(String(64))
+    storyboard_shot_id: Mapped[str | None] = mapped_column(String(64))
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    prompt_package_id: Mapped[str] = mapped_column(ForeignKey("prompt_packages.id"), nullable=False)
+    provider_strategy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    variant_count: Mapped[int] = mapped_column(Integer, default=1)
+    budget: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    quality: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    priority: Mapped[str] = mapped_column(String(32), default="normal")
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    idempotency_key: Mapped[str | None] = mapped_column(String(256))
+    image_prompt_package: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ImageGenerationJob(Base):
+    __tablename__ = "image_generation_jobs"
+    __table_args__ = (Index("idx_image_gen_jobs_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    request_id: Mapped[str] = mapped_column(
+        ForeignKey("image_generation_requests.id"), nullable=False
+    )
+    variant_number: Mapped[int] = mapped_column(Integer, default=1)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    provider_job_id: Mapped[str | None] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    fallback_count: Mapped[int] = mapped_column(Integer, default=0)
+    estimated_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    actual_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    parameters: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    seed: Mapped[int | None] = mapped_column(Integer)
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    parent_artifact_id: Mapped[str | None] = mapped_column(String(36))
+    depends_on: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ImageArtifact(Base):
+    __tablename__ = "image_artifacts"
+    __table_args__ = (Index("idx_image_artifacts_job", "generation_job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    generation_job_id: Mapped[str] = mapped_column(
+        ForeignKey("image_generation_jobs.id"), nullable=False
+    )
+    parent_artifact_id: Mapped[str | None] = mapped_column(ForeignKey("image_artifacts.id"))
+    storage_uri: Mapped[str] = mapped_column(Text, nullable=False)
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    file_size_bytes: Mapped[int | None] = mapped_column(Integer)
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    phash: Mapped[str | None] = mapped_column(String(128))
+    technical_qa: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    purpose: Mapped[str | None] = mapped_column(String(64))
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

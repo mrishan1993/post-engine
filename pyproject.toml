@@ -34,6 +34,8 @@ story = "story_engine.cli:app"
 storyboard = "storyboard_engine.cli:app"
 prompt = "prompt_engine.cli:app"
 generate = "generation_engine.cli:app"
+videogen = "video_generation_engine.cli:app"
+imagegen = "image_generation_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -59,6 +61,8 @@ packages = [
     "storyboard_engine",
     "prompt_engine",
     "generation_engine",
+    "video_generation_engine",
+    "image_generation_engine",
 ]
 
 [tool.pytest.ini_options]

@@ -37,6 +37,30 @@ class EventType(StrEnum):
     GENERATION_FALLBACK = "amp.generation.fallback.v1"
     ARTIFACT_CREATED = "amp.generation.artifact_created.v1"
     GENERATION_QA_COMPLETED = "amp.generation.qa_completed.v1"
+    VIDEO_GENERATION_REQUESTED = "amp.video.generation_requested.v1"
+    VIDEO_GENERATION_QUEUED = "amp.video.generation_queued.v1"
+    VIDEO_GENERATION_STARTED = "amp.video.generation_started.v1"
+    VIDEO_GENERATION_SUBMITTED = "amp.video.generation_submitted.v1"
+    VIDEO_GENERATION_PROCESSING = "amp.video.generation_processing.v1"
+    VIDEO_GENERATION_COMPLETED = "amp.video.generation_completed.v1"
+    VIDEO_GENERATION_FAILED = "amp.video.generation_failed.v1"
+    VIDEO_GENERATION_RETRIED = "amp.video.generation_retried.v1"
+    VIDEO_GENERATION_FALLBACK = "amp.video.generation_fallback.v1"
+    VIDEO_ARTIFACT_CREATED = "amp.video.artifact_created.v1"
+    VIDEO_TECHNICAL_QA_COMPLETED = "amp.video.technical_qa_completed.v1"
+    IMAGE_GENERATION_REQUESTED = "amp.image.generation_requested.v1"
+    IMAGE_GENERATION_QUEUED = "amp.image.generation_queued.v1"
+    IMAGE_GENERATION_STARTED = "amp.image.generation_started.v1"
+    IMAGE_GENERATION_SUBMITTED = "amp.image.generation_submitted.v1"
+    IMAGE_GENERATION_PROCESSING = "amp.image.generation_processing.v1"
+    IMAGE_GENERATION_COMPLETED = "amp.image.generation_completed.v1"
+    IMAGE_GENERATION_FAILED = "amp.image.generation_failed.v1"
+    IMAGE_GENERATION_RETRIED = "amp.image.generation_retried.v1"
+    IMAGE_GENERATION_FALLBACK = "amp.image.generation_fallback.v1"
+    IMAGE_ARTIFACT_CREATED = "amp.image.artifact_created.v1"
+    IMAGE_TECHNICAL_QA_COMPLETED = "amp.image.technical_qa_completed.v1"
+    IMAGE_EDITED = "amp.image.edited.v1"
+    IMAGE_VERSION_CREATED = "amp.image.version_created.v1"
 
 
 class TrendOpportunityCreated(BaseModel):
@@ -176,3 +200,25 @@ class ArtifactCreated(BaseModel):
     type: str
     storage_uri: str | None = None
     sha256: str | None = None
+
+
+class VideoArtifactCreated(BaseModel):
+    request_id: str
+    job_id: str
+    artifact_id: str
+    provider: str | None = None
+    duration_sec: float = 0.0
+    storage_uri: str | None = None
+    width: int | None = None
+    height: int | None = None
+
+
+class ImageArtifactCreated(BaseModel):
+    request_id: str
+    job_id: str
+    artifact_id: str
+    provider: str | None = None
+    storage_uri: str | None = None
+    width: int | None = None
+    height: int | None = None
+    quality_score: float | None = None

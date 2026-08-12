@@ -38,6 +38,8 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `storyboard` | Time-coded scenes/shots/audio specs (not prompts/video) |
 | `prompt` | CGS → provider prompt packages (compiler; no media) |
 | `generate` | Execute PromptPackages → local stub media artifacts |
+| `videogen` | Video-specialized path (refs, duration strategy, tech QA) |
+| `imagegen` | Image-specialized path (keyframes, refs, edits, tech QA) |
 
 ```bash
 trend v2 -v horror_narration
@@ -67,6 +69,15 @@ generate run --bootstrap -c ghost_kid -n 2
 generate show <request_id>
 generate artifacts <request_id>
 generate providers
+
+videogen run --bootstrap -c ghost_kid -n 2 --provider provider_a
+videogen artifacts <request_id>
+videogen providers
+
+imagegen run --bootstrap -c ghost_kid -n 2 --provider provider_a --purpose storyboard_keyframe
+imagegen artifacts <request_id>
+imagegen edit <artifact_id> -i "soften expression, keep identity"
+imagegen providers
 ```
 
 ## Repo layout (AMP-aligned)
@@ -82,6 +93,8 @@ generate providers
 | `storyboard_engine/` | → Storyboard Engine (scenes/shots/audio; not generation) |
 | `prompt_engine/` | → Prompt Engine (CGS + provider adapters; not generation) |
 | `generation_engine/` | → Generation Engine (jobs/router/artifacts; stub providers) |
+| `video_generation_engine/` | → Video Generation Engine (clips, refs, technical QA) |
+| `image_generation_engine/` | → Image Generation Engine (keyframes, refs, edits, tech QA) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |
@@ -112,6 +125,7 @@ pytest
 - [x] Storyboard Engine (scenes/shots/audio, critic, assets, CLI)
 - [x] Prompt Engine (CGS, adapters, critic, experiments, CLI)
 - [x] Generation Engine (jobs, routing, retry/fallback, stub artifacts, CLI)
+- [x] Video Generation Engine (provider A stub, refs, duration strategy, tech QA)
 - [ ] Redis Streams / Temporal extraction
 - [ ] Real provider clients (Anthropic, ElevenLabs, YouTube OAuth, …)
 - [ ] Dashboard / API gateway
