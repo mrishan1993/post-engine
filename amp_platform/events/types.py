@@ -122,6 +122,16 @@ class EventType(StrEnum):
     QA_REPAIR_REQUESTED = "amp.qa.repair_requested.v1"
     QA_REGENERATION_REQUESTED = "amp.qa.regeneration_requested.v1"
     QA_REVIEW_REQUIRED = "amp.qa.review_required.v1"
+    ANALYTICS_TRACKING_STARTED = "amp.performance.tracking_started.v1"
+    ANALYTICS_COLLECTION_STARTED = "amp.performance.collection_started.v1"
+    ANALYTICS_COLLECTION_COMPLETED = "amp.performance.collection_completed.v1"
+    PERFORMANCE_SNAPSHOT_CAPTURED = "amp.performance.snapshot_captured.v1"
+    VIRAL_STATE_CHANGED = "amp.performance.viral_state_changed.v1"
+    VIRAL_DETECTED = "amp.performance.viral_detected.v1"
+    LOW_RETENTION_DETECTED = "amp.performance.low_retention_detected.v1"
+    PERFORMANCE_DROP = "amp.performance.drop_detected.v1"
+    SECOND_WAVE_DETECTED = "amp.performance.second_wave_detected.v1"
+    HIGH_SHARE_RATE = "amp.performance.high_share_rate.v1"
 
 
 class TrendOpportunityCreated(BaseModel):

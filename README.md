@@ -45,6 +45,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `assemble` | Assembly (timeline → FFmpeg/stub → final reel + tech QA) |
 | `publish` | Publishing (accounts, QA-gated plans, multi-platform receipts) |
 | `qa` | QA (multi-dimension gate: PASS / REPAIR / REGENERATE / BLOCK) |
+| `perf` | Performance & Analytics (actuals, curves, virality, benchmarks) |
 
 ```bash
 trend v2 -v horror_narration
@@ -115,6 +116,13 @@ qa issues <qa_run_id>
 qa approval <qa_run_id>
 qa approve <qa_run_id> --reviewer ishan
 qa list
+
+perf run --bootstrap --profile viral
+perf show <publication_id>
+perf timeseries <publication_id> -m views
+perf retention <publication_id>
+perf benchmarks <publication_id>
+perf refresh <publication_id> --age 3600 --profile viral
 ```
 
 ## Repo layout (AMP-aligned)
@@ -137,6 +145,7 @@ qa list
 | `assembly_engine/` | → Assembly Engine (spec → timeline → final reel) |
 | `publishing_engine/` | → Publishing Engine (QA-gated multi-platform publish) |
 | `qa_engine/` | → QA Engine (multi-dimension gate before publish) |
+| `performance_engine/` | → Performance & Analytics (actuals after publish) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

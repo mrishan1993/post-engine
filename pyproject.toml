@@ -41,6 +41,7 @@ voicegen = "voice_generation_engine.cli:app"
 assemble = "assembly_engine.cli:app"
 publish = "publishing_engine.cli:app"
 qa = "qa_engine.cli:app"
+perf = "performance_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -73,6 +74,7 @@ packages = [
     "assembly_engine",
     "publishing_engine",
     "qa_engine",
+    "performance_engine",
 ]
 
 [tool.pytest.ini_options]

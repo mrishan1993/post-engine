@@ -442,6 +442,26 @@ class PublishingExecutor:
             },
             producer="publishing-engine",
         )
+        # Close the loop: start Performance Engine tracking (non-fatal)
+        try:
+            from performance_engine.service import PerformanceService
+
+            PerformanceService(self.session).start_tracking(
+                {
+                    "publication_id": receipt.id,
+                    "prediction": {
+                        "prediction_id": (plan.lineage or {}).get("prediction_id"),
+                    },
+                    "content_fingerprint": {
+                        "character": (plan.lineage or {}).get("character_slug"),
+                    },
+                    "collect_now": True,
+                    "simulate_age_sec": 300,
+                    "growth_profile": "normal",
+                }
+            )
+        except Exception:  # noqa: BLE001
+            pass
         return job
 
     def _ensure_token(self, account_id: str, provider: Any) -> None:

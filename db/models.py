@@ -1825,3 +1825,152 @@ class QaMeasurement(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Performance & Analytics Engine — actuals after publication
+# ---------------------------------------------------------------------------
+
+
+class AnalyticsCollectionJob(Base):
+    __tablename__ = "analytics_collection_jobs"
+    __table_args__ = (
+        Index("idx_analytics_jobs_status", "status"),
+        Index("idx_analytics_jobs_publication", "publication_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publication_id: Mapped[str] = mapped_column(
+        ForeignKey("publication_receipts.id"), nullable=False
+    )
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    # active | paused | completed | failed
+    poll_tier: Mapped[str] = mapped_column(String(32), default="high")
+    # high | medium | low | archival
+    next_collect_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_collected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    snapshot_count: Mapped[int] = mapped_column(Integer, default=0)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PlatformMetricResponse(Base):
+    __tablename__ = "platform_metric_responses"
+    __table_args__ = (Index("idx_platform_metric_responses_pub", "publication_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publication_id: Mapped[str | None] = mapped_column(ForeignKey("publication_receipts.id"))
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    endpoint: Mapped[str | None] = mapped_column(String(256))
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    response: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    http_status: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PerformanceSnapshot(Base):
+    __tablename__ = "performance_snapshots"
+    __table_args__ = (
+        Index("idx_perf_snapshots_pub_captured", "publication_id", "captured_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publication_id: Mapped[str] = mapped_column(
+        ForeignKey("publication_receipts.id"), nullable=False
+    )
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    account_id: Mapped[str | None] = mapped_column(String(36))
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    age_since_publish_sec: Mapped[int | None] = mapped_column(Integer)
+    metrics: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    derived: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    raw_response_id: Mapped[str | None] = mapped_column(ForeignKey("platform_metric_responses.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PerformanceTimeseries(Base):
+    __tablename__ = "performance_timeseries"
+    __table_args__ = (
+        Index("idx_perf_ts_pub_metric", "publication_id", "metric", "timestamp"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publication_id: Mapped[str] = mapped_column(
+        ForeignKey("publication_receipts.id"), nullable=False
+    )
+    metric: Mapped[str] = mapped_column(String(128), nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    value: Mapped[float | None] = mapped_column(Numeric(18, 4))
+    source: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PostAnalytics(Base):
+    __tablename__ = "post_analytics"
+
+    publication_id: Mapped[str] = mapped_column(
+        ForeignKey("publication_receipts.id"), primary_key=True
+    )
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    prediction_id: Mapped[str | None] = mapped_column(String(64))
+    platform: Mapped[str | None] = mapped_column(String(64))
+    current_views: Mapped[int | None] = mapped_column(Integer)
+    current_likes: Mapped[int | None] = mapped_column(Integer)
+    current_comments: Mapped[int | None] = mapped_column(Integer)
+    current_shares: Mapped[int | None] = mapped_column(Integer)
+    current_saves: Mapped[int | None] = mapped_column(Integer)
+    current_reach: Mapped[int | None] = mapped_column(Integer)
+    followers_gained: Mapped[int | None] = mapped_column(Integer)
+    engagement_rate: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    share_rate: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    save_rate: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    completion_rate: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    weighted_engagement: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    virality_score: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    performance_index: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    percentile_rank: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    view_velocity_per_hour: Mapped[float | None] = mapped_column(Numeric(18, 4))
+    share_velocity_per_hour: Mapped[float | None] = mapped_column(Numeric(18, 4))
+    acceleration: Mapped[float | None] = mapped_column(Numeric(18, 4))
+    viral_state: Mapped[str] = mapped_column(String(32), default="normal")
+    content_fingerprint: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    performance_vector: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    first_hour: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    prediction_link: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    engagement_formula_version: Mapped[str] = mapped_column(String(32), default="v1")
+    virality_model_version: Mapped[str] = mapped_column(String(32), default="v1")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RetentionCurve(Base):
+    __tablename__ = "retention_curves"
+    __table_args__ = (Index("idx_retention_curves_pub", "publication_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publication_id: Mapped[str] = mapped_column(
+        ForeignKey("publication_receipts.id"), nullable=False
+    )
+    timestamp_sec: Mapped[float] = mapped_column(Numeric(10, 3), nullable=False)
+    retention_percent: Mapped[float] = mapped_column(Numeric(8, 4), nullable=False)
+    source: Mapped[str | None] = mapped_column(String(64))
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudienceSnapshot(Base):
+    __tablename__ = "audience_snapshots"
+    __table_args__ = (Index("idx_audience_snapshots_pub", "publication_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publication_id: Mapped[str] = mapped_column(
+        ForeignKey("publication_receipts.id"), nullable=False
+    )
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    follower_count: Mapped[int | None] = mapped_column(Integer)
+    non_follower_reach: Mapped[int | None] = mapped_column(Integer)
+    demographics: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    geography: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
