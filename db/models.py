@@ -1630,3 +1630,128 @@ class RenderedArtifact(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Publishing Engine — QA-gated multi-platform publish + receipts
+# ---------------------------------------------------------------------------
+
+
+class SocialAccount(Base):
+    __tablename__ = "social_accounts"
+    __table_args__ = (
+        UniqueConstraint("platform", "external_account_id", name="uq_social_platform_external"),
+        Index("idx_social_accounts_platform", "platform"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    external_account_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    display_name: Mapped[str | None] = mapped_column(String(256))
+    username: Mapped[str | None] = mapped_column(String(256))
+    timezone: Mapped[str] = mapped_column(String(64), default="UTC")
+    status: Mapped[str] = mapped_column(String(32), default="connected")
+    # connected | disconnected | error | pending
+    token_status: Mapped[str] = mapped_column(String(32), default="active")
+    # active | expired | refresh_required | revoked
+    permissions: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    capabilities: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    default_settings: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    character_slug: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SocialCredential(Base):
+    __tablename__ = "social_credentials"
+    __table_args__ = (Index("idx_social_credentials_account", "social_account_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    social_account_id: Mapped[str] = mapped_column(ForeignKey("social_accounts.id"), nullable=False)
+    # Opaque reference into encrypted secret store — never plaintext tokens
+    credential_reference: Mapped[str] = mapped_column(Text, nullable=False)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    scopes: Mapped[list[str]] = mapped_column(JSONList, default=list)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    last_refreshed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    refresh_status: Mapped[str | None] = mapped_column(String(32))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PublishingPlan(Base):
+    __tablename__ = "publishing_plans"
+    __table_args__ = (
+        Index("idx_publishing_plans_status", "status"),
+        Index("idx_publishing_plans_content", "content_id"),
+        UniqueConstraint("idempotency_key", name="uq_publishing_plan_idempotency"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    assembly_id: Mapped[str | None] = mapped_column(ForeignKey("assemblies.id"))
+    master_artifact_id: Mapped[str | None] = mapped_column(String(36))
+    cover_artifact_id: Mapped[str | None] = mapped_column(String(36))
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    # draft | approved | scheduled | publishing | completed | partial | failed | cancelled
+    schedule: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    approval: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    policy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    platforms: Mapped[list[dict[str, Any]]] = mapped_column(JSONList, default=list)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    idempotency_key: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PublishingJob(Base):
+    __tablename__ = "publishing_jobs"
+    __table_args__ = (
+        Index("idx_publishing_jobs_status", "status"),
+        Index("idx_publishing_jobs_plan", "publishing_plan_id"),
+        UniqueConstraint("idempotency_key", name="uq_publishing_job_idempotency"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publishing_plan_id: Mapped[str] = mapped_column(ForeignKey("publishing_plans.id"), nullable=False)
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    social_account_id: Mapped[str] = mapped_column(ForeignKey("social_accounts.id"), nullable=False)
+    platform_package: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    external_media_id: Mapped[str | None] = mapped_column(String(256))
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    idempotency_key: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PublicationReceipt(Base):
+    __tablename__ = "publication_receipts"
+    __table_args__ = (
+        Index("idx_publication_receipts_job", "publishing_job_id"),
+        UniqueConstraint(
+            "platform", "external_post_id", name="uq_publication_platform_external_post"
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    publishing_job_id: Mapped[str] = mapped_column(ForeignKey("publishing_jobs.id"), nullable=False)
+    publishing_plan_id: Mapped[str | None] = mapped_column(ForeignKey("publishing_plans.id"))
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    social_account_id: Mapped[str | None] = mapped_column(ForeignKey("social_accounts.id"))
+    external_post_id: Mapped[str | None] = mapped_column(String(256))
+    external_media_id: Mapped[str | None] = mapped_column(String(256))
+    post_url: Mapped[str | None] = mapped_column(Text)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    verification_status: Mapped[str] = mapped_column(String(32), default="pending")
+    # pending | verified | failed
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    raw_response: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    # Bridge to legacy publications table when present
+    legacy_publication_id: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

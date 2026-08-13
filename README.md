@@ -43,6 +43,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `musicgen` | Music & SFX (blueprint, library SFX, timeline) |
 | `voicegen` | Voice generation (profiles, takes, timestamps, timeline) |
 | `assemble` | Assembly (timeline → FFmpeg/stub → final reel + tech QA) |
+| `publish` | Publishing (accounts, QA-gated plans, multi-platform receipts) |
 
 ```bash
 trend v2 -v horror_narration
@@ -98,6 +99,14 @@ assemble profiles
 assemble list
 assemble artifacts <assembly_id>
 assemble render-status <render_id>
+
+publish run --bootstrap -c ghost_kid --platforms instagram,youtube
+publish connect instagram -e ig_1 -u ghost_kid_ig --token stub
+publish accounts
+publish profiles
+publish list
+publish show <plan_id>
+publish receipt <job_id>
 ```
 
 ## Repo layout (AMP-aligned)
@@ -118,6 +127,7 @@ assemble render-status <render_id>
 | `music_sfx_engine/` | → Music & SFX Engine (blueprint, music, SFX library, timeline) |
 | `voice_generation_engine/` | → Voice Generation Engine (profiles, dialogue takes, timestamps) |
 | `assembly_engine/` | → Assembly Engine (spec → timeline → final reel) |
+| `publishing_engine/` | → Publishing Engine (QA-gated multi-platform publish) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

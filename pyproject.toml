@@ -39,6 +39,7 @@ imagegen = "image_generation_engine.cli:app"
 musicgen = "music_sfx_engine.cli:app"
 voicegen = "voice_generation_engine.cli:app"
 assemble = "assembly_engine.cli:app"
+publish = "publishing_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -69,6 +70,7 @@ packages = [
     "music_sfx_engine",
     "voice_generation_engine",
     "assembly_engine",
+    "publishing_engine",
 ]
 
 [tool.pytest.ini_options]

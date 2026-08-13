@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     temp_hosting_base_url: str | None = Field(default=None, alias="TEMP_HOSTING_BASE_URL")
     alert_webhook_url: str | None = Field(default=None, alias="ALERT_WEBHOOK_URL")
     trend_stub_collectors: bool = Field(default=True, alias="TREND_STUB_COLLECTORS")
+    # Used to encrypt social credential payloads at rest (never store tokens plaintext)
+    credentials_key: str = Field(
+        default="amp-dev-credentials-key-change-me",
+        alias="AMP_CREDENTIALS_KEY",
+    )
 
 
 @lru_cache

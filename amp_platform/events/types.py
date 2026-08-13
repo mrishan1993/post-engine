@@ -93,6 +93,20 @@ class EventType(StrEnum):
     RENDER_CANCELLED = "amp.assembly.render_cancelled.v1"
     RENDER_ARTIFACT_CREATED = "amp.assembly.render_artifact_created.v1"
     RENDER_TECHNICAL_QA_COMPLETED = "amp.assembly.render_technical_qa_completed.v1"
+    SOCIAL_ACCOUNT_CONNECTED = "amp.publishing.social_account_connected.v1"
+    SOCIAL_ACCOUNT_DISCONNECTED = "amp.publishing.social_account_disconnected.v1"
+    PUBLISHING_PLAN_CREATED = "amp.publishing.plan_created.v1"
+    PUBLISHING_PLAN_APPROVED = "amp.publishing.plan_approved.v1"
+    PUBLISHING_SCHEDULED = "amp.publishing.scheduled.v1"
+    PUBLISHING_QUEUED = "amp.publishing.queued.v1"
+    PUBLISHING_STARTED = "amp.publishing.started.v1"
+    MEDIA_UPLOAD_STARTED = "amp.publishing.media_upload_started.v1"
+    MEDIA_UPLOAD_COMPLETED = "amp.publishing.media_upload_completed.v1"
+    PUBLISHING_COMPLETED = "amp.publishing.completed.v1"
+    PUBLISHING_FAILED = "amp.publishing.failed.v1"
+    PUBLISHING_RETRY = "amp.publishing.retry.v1"
+    PUBLISHING_BLOCKED = "amp.publishing.blocked.v1"
+    PUBLICATION_VERIFIED = "amp.publishing.publication_verified.v1"
 
 
 class TrendOpportunityCreated(BaseModel):
