@@ -1442,3 +1442,191 @@ class AudioTimelineRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Voice Generation Engine — dialogue/narration performance (not script)
+# ---------------------------------------------------------------------------
+
+
+class VoiceGenerationRequest(Base):
+    __tablename__ = "voice_generation_requests"
+    __table_args__ = (
+        Index("idx_voice_gen_requests_status", "status"),
+        UniqueConstraint("idempotency_key", name="uq_voice_gen_idempotency"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    story_id: Mapped[str | None] = mapped_column(ForeignKey("stories.id"))
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    character_id: Mapped[str | None] = mapped_column(ForeignKey("characters.id"))
+    voice_profile_id: Mapped[str | None] = mapped_column(ForeignKey("voice_profiles.id"))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    script: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    voice_spec: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider_strategy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    variant_count: Mapped[int] = mapped_column(Integer, default=1)
+    budget: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    quality: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    priority: Mapped[str] = mapped_column(String(32), default="normal")
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    idempotency_key: Mapped[str | None] = mapped_column(String(256))
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class VoiceGenerationJob(Base):
+    __tablename__ = "voice_generation_jobs"
+    __table_args__ = (Index("idx_voice_gen_jobs_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    request_id: Mapped[str] = mapped_column(
+        ForeignKey("voice_generation_requests.id"), nullable=False
+    )
+    variant_number: Mapped[int] = mapped_column(Integer, default=1)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    provider_job_id: Mapped[str | None] = mapped_column(String(256))
+    provider_voice_id: Mapped[str | None] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    fallback_count: Mapped[int] = mapped_column(Integer, default=0)
+    estimated_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    actual_cost: Mapped[float | None] = mapped_column(Numeric(12, 6))
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    parameters: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    seed: Mapped[int | None] = mapped_column(Integer)
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class VoiceArtifact(Base):
+    __tablename__ = "voice_artifacts"
+    __table_args__ = (Index("idx_voice_artifacts_job", "generation_job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    generation_job_id: Mapped[str] = mapped_column(
+        ForeignKey("voice_generation_jobs.id"), nullable=False
+    )
+    parent_artifact_id: Mapped[str | None] = mapped_column(ForeignKey("voice_artifacts.id"))
+    character_id: Mapped[str | None] = mapped_column(ForeignKey("characters.id"))
+    voice_profile_id: Mapped[str | None] = mapped_column(ForeignKey("voice_profiles.id"))
+    artifact_type: Mapped[str] = mapped_column(String(32), default="dialogue")
+    storage_uri: Mapped[str] = mapped_column(Text, nullable=False)
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    duration_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    sample_rate: Mapped[int | None] = mapped_column(Integer)
+    channels: Mapped[int | None] = mapped_column(Integer)
+    loudness_lufs: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    true_peak_db: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    script_hash: Mapped[str | None] = mapped_column(String(64))
+    timestamps: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    file_size_bytes: Mapped[int | None] = mapped_column(Integer)
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    technical_qa: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    provider: Mapped[str | None] = mapped_column(String(128))
+    model: Mapped[str | None] = mapped_column(String(128))
+    prompt_package_id: Mapped[str | None] = mapped_column(ForeignKey("prompt_packages.id"))
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class VoiceTimelineRow(Base):
+    __tablename__ = "voice_timelines"
+    __table_args__ = (Index("idx_voice_timelines_storyboard", "storyboard_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    duration_sec: Mapped[float] = mapped_column(Numeric(8, 3), nullable=False)
+    segments: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="ready")
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PronunciationEntry(Base):
+    __tablename__ = "pronunciation_entries"
+    __table_args__ = (UniqueConstraint("term", "language", name="uq_pronunciation_term_lang"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    term: Mapped[str] = mapped_column(String(256), nullable=False)
+    language: Mapped[str] = mapped_column(String(32), default="en")
+    pronunciation: Mapped[str | None] = mapped_column(String(512))
+    phoneme: Mapped[str | None] = mapped_column(String(512))
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Assembly Engine — timeline + FFmpeg render → final reel
+# ---------------------------------------------------------------------------
+
+
+class Assembly(Base):
+    __tablename__ = "assemblies"
+    __table_args__ = (
+        UniqueConstraint("content_id", "version", name="uq_assembly_content_version"),
+        Index("idx_assemblies_status", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    storyboard_id: Mapped[str | None] = mapped_column(ForeignKey("storyboards.id"))
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    specification: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    timeline: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    duration_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    # draft | validated | rendering | completed | failed
+    platform_profile: Mapped[str | None] = mapped_column(String(128))
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RenderJob(Base):
+    __tablename__ = "render_jobs"
+    __table_args__ = (Index("idx_render_jobs_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    assembly_id: Mapped[str] = mapped_column(ForeignKey("assemblies.id"), nullable=False)
+    render_profile: Mapped[str] = mapped_column(String(128), default="instagram_reels_v1")
+    quality: Mapped[str] = mapped_column(String(32), default="final")  # draft|preview|final
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    progress: Mapped[float] = mapped_column(Numeric(5, 2), default=0)
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    ffmpeg_version: Mapped[str | None] = mapped_column(String(64))
+    ffmpeg_used: Mapped[bool] = mapped_column(Boolean, default=False)
+    parameters: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    error: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RenderedArtifact(Base):
+    __tablename__ = "rendered_artifacts"
+    __table_args__ = (Index("idx_rendered_artifacts_render", "render_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    render_id: Mapped[str] = mapped_column(ForeignKey("render_jobs.id"), nullable=False)
+    assembly_id: Mapped[str | None] = mapped_column(ForeignKey("assemblies.id"))
+    artifact_type: Mapped[str] = mapped_column(String(32), default="final_video")
+    storage_uri: Mapped[str] = mapped_column(Text, nullable=False)
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    fps: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    duration_sec: Mapped[float | None] = mapped_column(Numeric(8, 3))
+    video_codec: Mapped[str | None] = mapped_column(String(64))
+    audio_codec: Mapped[str | None] = mapped_column(String(64))
+    file_size_bytes: Mapped[int | None] = mapped_column(Integer)
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    technical_qa: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    render_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

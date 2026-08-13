@@ -92,7 +92,12 @@ def seed_from_v2_config(session: Session) -> dict[str, Any]:
                 slug=f"voice_{slug}",
                 name=f"{c['name']} Voice",
                 characteristics={"description": c.get("voice"), "traits": c.get("traits")},
-                provider_mappings={"elevenlabs": None, "stub": f"stub_{slug}"},
+                provider_mappings={
+                    "elevenlabs": None,
+                    "stub": f"stub_{slug}",
+                    "provider_a": f"provider_a_voice_{slug}",
+                    "provider_b": f"provider_b_voice_{slug}",
+                },
                 status="active",
             )
             created["voices"] += 1

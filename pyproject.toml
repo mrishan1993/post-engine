@@ -37,6 +37,8 @@ generate = "generation_engine.cli:app"
 videogen = "video_generation_engine.cli:app"
 imagegen = "image_generation_engine.cli:app"
 musicgen = "music_sfx_engine.cli:app"
+voicegen = "voice_generation_engine.cli:app"
+assemble = "assembly_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -65,6 +67,8 @@ packages = [
     "video_generation_engine",
     "image_generation_engine",
     "music_sfx_engine",
+    "voice_generation_engine",
+    "assembly_engine",
 ]
 
 [tool.pytest.ini_options]
