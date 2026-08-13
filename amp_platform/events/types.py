@@ -107,6 +107,21 @@ class EventType(StrEnum):
     PUBLISHING_RETRY = "amp.publishing.retry.v1"
     PUBLISHING_BLOCKED = "amp.publishing.blocked.v1"
     PUBLICATION_VERIFIED = "amp.publishing.publication_verified.v1"
+    QA_RUN_STARTED = "amp.qa.run_started.v1"
+    TECHNICAL_QA_COMPLETED = "amp.qa.technical_completed.v1"
+    VISUAL_QA_COMPLETED = "amp.qa.visual_completed.v1"
+    AUDIO_QA_COMPLETED = "amp.qa.audio_completed.v1"
+    CHARACTER_QA_COMPLETED = "amp.qa.character_completed.v1"
+    STORY_QA_COMPLETED = "amp.qa.story_completed.v1"
+    CAPTION_QA_COMPLETED = "amp.qa.caption_completed.v1"
+    PLATFORM_QA_COMPLETED = "amp.qa.platform_completed.v1"
+    SAFETY_QA_COMPLETED = "amp.qa.safety_completed.v1"
+    QA_RUN_COMPLETED = "amp.qa.run_completed.v1"
+    QA_APPROVED = "amp.qa.approved.v1"
+    QA_REJECTED = "amp.qa.rejected.v1"
+    QA_REPAIR_REQUESTED = "amp.qa.repair_requested.v1"
+    QA_REGENERATION_REQUESTED = "amp.qa.regeneration_requested.v1"
+    QA_REVIEW_REQUIRED = "amp.qa.review_required.v1"
 
 
 class TrendOpportunityCreated(BaseModel):

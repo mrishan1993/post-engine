@@ -1755,3 +1755,73 @@ class PublicationReceipt(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# QA Engine — multi-dimension gatekeeper before publishing
+# ---------------------------------------------------------------------------
+
+
+class QaRun(Base):
+    __tablename__ = "qa_runs"
+    __table_args__ = (
+        Index("idx_qa_runs_status", "status"),
+        Index("idx_qa_runs_content", "content_id"),
+        UniqueConstraint("content_id", "version", name="uq_qa_content_version"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    assembly_id: Mapped[str | None] = mapped_column(ForeignKey("assemblies.id"))
+    artifact_id: Mapped[str | None] = mapped_column(String(36))
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    status: Mapped[str] = mapped_column(String(32), default="queued")
+    # queued | running | completed | failed | review_required
+    decision: Mapped[str | None] = mapped_column(String(32))
+    # pass | repair | regenerate | block | review_required
+    overall_score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    dimension_scores: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    result: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    human_review: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    thresholds: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class QaIssue(Base):
+    __tablename__ = "qa_issues"
+    __table_args__ = (Index("idx_qa_issues_run", "qa_run_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    qa_run_id: Mapped[str] = mapped_column(ForeignKey("qa_runs.id"), nullable=False)
+    issue_code: Mapped[str] = mapped_column(String(128), nullable=False)
+    severity: Mapped[str] = mapped_column(String(32), default="medium")
+    category: Mapped[str | None] = mapped_column(String(64))
+    artifact_id: Mapped[str | None] = mapped_column(String(36))
+    scene_id: Mapped[str | None] = mapped_column(String(64))
+    timestamp_sec: Mapped[float | None] = mapped_column(Numeric(10, 3))
+    score: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    description: Mapped[str | None] = mapped_column(Text)
+    owner_engine: Mapped[str | None] = mapped_column(String(128))
+    recommended_action: Mapped[str | None] = mapped_column(String(64))
+    # none | repair | regenerate | block | review
+    status: Mapped[str] = mapped_column(String(32), default="open")
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class QaMeasurement(Base):
+    __tablename__ = "qa_measurements"
+    __table_args__ = (Index("idx_qa_measurements_run", "qa_run_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    qa_run_id: Mapped[str] = mapped_column(ForeignKey("qa_runs.id"), nullable=False)
+    dimension: Mapped[str] = mapped_column(String(64), nullable=False)
+    metric: Mapped[str] = mapped_column(String(128), nullable=False)
+    value: Mapped[float | None] = mapped_column(Numeric(12, 4))
+    threshold: Mapped[float | None] = mapped_column(Numeric(12, 4))
+    passed: Mapped[bool] = mapped_column(Boolean, default=True)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

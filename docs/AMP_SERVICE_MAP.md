@@ -12,7 +12,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Generation Service** | `generation_engine/` + `video_generation_engine/` + `image_generation_engine/` + `music_sfx_engine/` + `voice_generation_engine/`; legacy `agents/*` | Multi-modal generation + P0 specialized paths |
 | **Assembly Service** | `assembly_engine/` (spec, timeline, FFmpeg/stub render, tech QA) | Combines generated assets into final reel; does not invent story |
 | **Publishing Service** | `publishing_engine/` (+ legacy `agents/publishing_agent.py`, `providers/{youtube,instagram}`) | Executes QA-approved publishing plans; never decides creative quality |
-| **QA Service** | `agents/safety_qa_agent.py`, `qa/`, CLI approve/reject, `orchestration/state_machine.py` QA transitions | Must remain mandatory gate (blocks Publishing) |
+| **QA Service** | `qa_engine/` (+ legacy `agents/safety_qa_agent.py`, `qa/`, orchestration `qa_*`) | Multi-dimension gatekeeper; PASS/REPAIR/REGENERATE/BLOCK before Publishing |
 | **Metrics Service** | `metrics/collector.py`, `metrics/reporting.py` | Expand to real platform APIs |
 | **Verification Service** | `prediction/verification.py`, `prediction/calibration.py` | Consumes metrics + predictions |
 | **Learning Service** | `prediction/learning.py`, trend feedback calibrator | Phase-3; keep thin until data volume |
@@ -27,6 +27,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Voice Generation Engine** | `voice_generation_engine/` (voice registry, jobs, artifacts, word timestamps, timeline) | P0 dialogue/narration performance; does not invent script |
 | **Assembly Engine** | `assembly_engine/` (AssemblySpecification, tracks, ducking, captions, render jobs, artifacts) | P0 reel assembly; executes storyboard timing; FFmpeg + stub; never invents creative intent |
 | **Publishing Engine** | `publishing_engine/` (accounts, encrypted credentials, plans, jobs, receipts, platform adapters) | P0 Instagram+YouTube (+TikTok stub); QA/policy gated; verifies posts; lineage → Performance |
+| **QA Engine** | `qa_engine/` (technical→safety dimensions, decision engine, issue routing, publishing bridge) | P0 gatekeeper; deterministic-first cascade; routes repair/regen to owner engines |
 
 ## Shared platform (current → target)
 
@@ -67,6 +68,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `VoiceGenerationRequested`…`VoiceArtifactCreated` / `VoiceTimelineCreated` | `voice_generation_engine/` |
 | `AssemblyCreated`…`RenderCompleted` / `RenderArtifactCreated` / `RenderTechnicalQACompleted` | `assembly_engine/` |
 | `SocialAccountConnected`…`PublicationVerified` / `PublishingBlocked` | `publishing_engine/` |
+| `QARunStarted`…`QARunCompleted` / `QAApproved` / `QARepairRequested` / `QARegenerationRequested` | `qa_engine/` |
 
 ## Extraction order (recommended)
 

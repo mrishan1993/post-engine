@@ -44,6 +44,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `voicegen` | Voice generation (profiles, takes, timestamps, timeline) |
 | `assemble` | Assembly (timeline → FFmpeg/stub → final reel + tech QA) |
 | `publish` | Publishing (accounts, QA-gated plans, multi-platform receipts) |
+| `qa` | QA (multi-dimension gate: PASS / REPAIR / REGENERATE / BLOCK) |
 
 ```bash
 trend v2 -v horror_narration
@@ -107,6 +108,13 @@ publish profiles
 publish list
 publish show <plan_id>
 publish receipt <job_id>
+
+qa run --bootstrap -c ghost_kid
+qa run --assembly <assembly_id>
+qa issues <qa_run_id>
+qa approval <qa_run_id>
+qa approve <qa_run_id> --reviewer ishan
+qa list
 ```
 
 ## Repo layout (AMP-aligned)
@@ -128,6 +136,7 @@ publish receipt <job_id>
 | `voice_generation_engine/` | → Voice Generation Engine (profiles, dialogue takes, timestamps) |
 | `assembly_engine/` | → Assembly Engine (spec → timeline → final reel) |
 | `publishing_engine/` | → Publishing Engine (QA-gated multi-platform publish) |
+| `qa_engine/` | → QA Engine (multi-dimension gate before publish) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

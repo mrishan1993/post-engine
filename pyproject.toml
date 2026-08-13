@@ -40,6 +40,7 @@ musicgen = "music_sfx_engine.cli:app"
 voicegen = "voice_generation_engine.cli:app"
 assemble = "assembly_engine.cli:app"
 publish = "publishing_engine.cli:app"
+qa = "qa_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -71,6 +72,7 @@ packages = [
     "voice_generation_engine",
     "assembly_engine",
     "publishing_engine",
+    "qa_engine",
 ]
 
 [tool.pytest.ini_options]
