@@ -2281,3 +2281,112 @@ class OrchestrationDecisionLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Content Strategy & Planning Engine (AMP)
+# Portfolio brain — not individual-post optimization
+# ---------------------------------------------------------------------------
+
+
+class ContentStrategy(Base):
+    __tablename__ = "content_strategies"
+    __table_args__ = (Index("idx_content_strategies_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    character_slug: Mapped[str | None] = mapped_column(String(64))
+    profile: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    # active | paused | archived
+    autonomy: Mapped[str] = mapped_column(String(32), default="semi_autonomous")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StrategyOpportunity(Base):
+    __tablename__ = "strategy_opportunities"
+    __table_args__ = (
+        Index("idx_strategy_opportunities_strategy", "strategy_id"),
+        Index("idx_strategy_opportunities_status", "status"),
+        Index("idx_strategy_opportunities_priority", "priority"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    strategy_id: Mapped[str] = mapped_column(ForeignKey("content_strategies.id"), nullable=False)
+    source: Mapped[str] = mapped_column(String(64), nullable=False)
+    # trend | evergreen | audience_request | campaign | experiment | reactive | repurpose | gap
+    title: Mapped[str | None] = mapped_column(String(256))
+    objective: Mapped[str | None] = mapped_column(String(128))
+    audience: Mapped[str | None] = mapped_column(String(128))
+    pillar: Mapped[str | None] = mapped_column(String(64))
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    format: Mapped[str] = mapped_column(String(64), default="reel")
+    priority: Mapped[str] = mapped_column(String(8), default="P3")
+    strategic_score: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    score_breakdown: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    expected_impact: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    effort: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    payload: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="detected")
+    # detected | evaluating | accepted | planned | scheduled | production |
+    # published | measuring | learned | rejected | deferred | expired | cancelled
+    expiration_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    trend_id: Mapped[str | None] = mapped_column(String(64))
+    orchestration_job_id: Mapped[str | None] = mapped_column(String(36))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ContentPlan(Base):
+    __tablename__ = "content_plans"
+    __table_args__ = (Index("idx_content_plans_strategy", "strategy_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    strategy_id: Mapped[str] = mapped_column(ForeignKey("content_strategies.id"), nullable=False)
+    period_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    period_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    objectives: Mapped[dict[str, Any] | list[Any] | None] = mapped_column(JSON)
+    content_mix: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    capacity: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ContentPlanItem(Base):
+    __tablename__ = "content_plan_items"
+    __table_args__ = (
+        Index("idx_content_plan_items_plan", "plan_id"),
+        Index("idx_content_plan_items_status", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    plan_id: Mapped[str] = mapped_column(ForeignKey("content_plans.id"), nullable=False)
+    opportunity_id: Mapped[str | None] = mapped_column(ForeignKey("strategy_opportunities.id"))
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    pillar: Mapped[str | None] = mapped_column(String(64))
+    content_type: Mapped[str | None] = mapped_column(String(64))
+    priority: Mapped[str] = mapped_column(String(8), default="P3")
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(32), default="planned")
+    # planned | scheduled | deferred | cancelled | production | published
+    slot_meta: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StrategyDecisionLog(Base):
+    __tablename__ = "strategy_decision_log"
+    __table_args__ = (Index("idx_strategy_decision_log_strategy", "strategy_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    strategy_id: Mapped[str | None] = mapped_column(ForeignKey("content_strategies.id"))
+    plan_id: Mapped[str | None] = mapped_column(ForeignKey("content_plans.id"))
+    decision_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    decision: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text)
+    expected_outcome: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    model_version: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

@@ -171,6 +171,22 @@ class EventType(StrEnum):
     ORCHESTRATION_AWAITING_APPROVAL = "amp.orchestration.awaiting_approval.v1"
     ORCHESTRATION_JOB_COMPLETED = "amp.orchestration.job_completed.v1"
     ORCHESTRATION_JOB_FAILED = "amp.orchestration.job_failed.v1"
+    STRATEGY_CREATED = "amp.strategy.created.v1"
+    STRATEGY_UPDATED = "amp.strategy.updated.v1"
+    OPPORTUNITY_RECEIVED = "amp.strategy.opportunity_received.v1"
+    OPPORTUNITY_SCORED = "amp.strategy.opportunity_scored.v1"
+    OPPORTUNITY_ACCEPTED = "amp.strategy.opportunity_accepted.v1"
+    OPPORTUNITY_REJECTED = "amp.strategy.opportunity_rejected.v1"
+    PLAN_CREATED = "amp.strategy.plan_created.v1"
+    PLAN_UPDATED = "amp.strategy.plan_updated.v1"
+    PLAN_REPLANNED = "amp.strategy.plan_replanned.v1"
+    CONTENT_SCHEDULED = "amp.strategy.content_scheduled.v1"
+    CONTENT_PRIORITIZED = "amp.strategy.content_prioritized.v1"
+    CONTENT_DEFERRED = "amp.strategy.content_deferred.v1"
+    CONTENT_CANCELLED = "amp.strategy.content_cancelled.v1"
+    CONTENT_EXECUTION_REQUESTED = "amp.strategy.content_execution_requested.v1"
+    STRATEGY_LEARNING_RECEIVED = "amp.strategy.learning_received.v1"
+    STRATEGY_OPTIMIZED = "amp.strategy.optimized.v1"
 
 
 class TrendOpportunityCreated(BaseModel):

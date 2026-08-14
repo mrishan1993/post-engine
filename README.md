@@ -49,6 +49,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `verify` | Verification (predicted vs actual, calibration, learning signals) |
 | `learn` | Learning & Optimization (patterns, profiles, briefs, experiments) |
 | `orchestrate` | Trend-to-Reel Orchestration (evaluate → concept → brief → produce) |
+| `strategy` | Content Strategy & Planning (portfolio, calendar, replan, execute) |
 
 ```bash
 trend v2 -v horror_narration
@@ -152,6 +153,16 @@ orchestrate approve <job_id> --gate concept
 orchestrate lineage <job_id>
 orchestrate decisions <job_id>
 orchestrate list
+
+strategy run --bootstrap
+strategy run --bootstrap --execute
+strategy show <strategy_id>
+strategy opportunities <strategy_id>
+strategy plan <strategy_id>
+strategy calendar <strategy_id>
+strategy replan <plan_id> --trend <trend_id>
+strategy execute <strategy_id>
+strategy decisions <strategy_id>
 ```
 
 ## Repo layout (AMP-aligned)
@@ -178,6 +189,7 @@ orchestrate list
 | `verification_engine/` | → Verification (error, calibration, learning signals; not causality) |
 | `learning_engine/` | → Learning & Optimization (observations, patterns, briefs; not content gen) |
 | `orchestration_engine/` | → Trend-to-Reel Orchestration (coordinates engines; not a generator) |
+| `strategy_engine/` | → Content Strategy & Planning (portfolio brain; not post optimizer) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

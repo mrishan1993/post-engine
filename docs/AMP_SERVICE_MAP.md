@@ -32,6 +32,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Verification Engine** | `verification_engine/` (runs, metric results, calibration buckets, learning signals, diagnosis) | P0 predicted vs actual; Brier/log-loss/buckets; LearningSignals for Optimization; never overwrites predictions |
 | **Learning & Optimization Engine** | `learning_engine/` (observations, patterns, profiles, experiments, model registry) | P0 feedback loop; Content Optimization Brief; autonomy L1–2; never mutates production models in place |
 | **Trend-to-Reel Orchestration Engine** | `orchestration_engine/` (jobs, concepts, briefs, engine_runs, decision_log) | P0 connective tissue; mechanism≠surface; human gates; lineage Trend→Publish |
+| **Content Strategy & Planning Engine** | `strategy_engine/` (strategies, opportunities, plans, calendar, replan) | P0 portfolio brain; capacity-aware; dynamic replan; feeds Orchestrator |
 
 ## Shared platform (current → target)
 
@@ -77,6 +78,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `VerificationStarted`…`LearningSignalCreated` / `CalibrationUpdated` | `verification_engine/` |
 | `LearningObservationCreated`…`OptimizationProfileUpdated` / `ModelPromoted` | `learning_engine/` |
 | `OrchestrationJobCreated`…`OrchestrationJobCompleted` / `ConceptSelected` / `ProductionBriefCreated` | `orchestration_engine/` |
+| `StrategyCreated`…`PlanReplanned` / `ContentExecutionRequested` | `strategy_engine/` |
 
 ## Extraction order (recommended)
 
