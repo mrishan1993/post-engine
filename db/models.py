@@ -2390,3 +2390,164 @@ class StrategyDecisionLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Campaign & Content Portfolio Engine (AMP)
+# Coordinates campaigns/series/episodes — not individual post production
+# ---------------------------------------------------------------------------
+
+
+class Campaign(Base):
+    __tablename__ = "campaigns"
+    __table_args__ = (
+        Index("idx_campaigns_status", "status"),
+        Index("idx_campaigns_strategy", "strategy_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    strategy_id: Mapped[str | None] = mapped_column(ForeignKey("content_strategies.id"))
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    campaign_type: Mapped[str] = mapped_column(String(64), default="growth")
+    objective: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    audience: Mapped[dict[str, Any] | list[Any] | None] = mapped_column(JSON)
+    platforms: Mapped[dict[str, Any] | list[Any] | None] = mapped_column(JSON)
+    kpis: Mapped[dict[str, Any] | list[Any] | None] = mapped_column(JSON)
+    hypothesis: Mapped[str | None] = mapped_column(Text)
+    priority: Mapped[float] = mapped_column(Numeric(8, 4), default=0.5)
+    budget: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    content_target: Mapped[int] = mapped_column(Integer, default=10)
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    character_slug: Mapped[str | None] = mapped_column(String(64))
+    continuity: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    journey: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    start_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    end_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ContentSeries(Base):
+    __tablename__ = "content_series"
+    __table_args__ = (Index("idx_content_series_campaign", "campaign_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    premise: Mapped[str | None] = mapped_column(Text)
+    format: Mapped[str] = mapped_column(String(64), default="reel")
+    character_slug: Mapped[str | None] = mapped_column(String(64))
+    narrative_rules: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    visual_rules: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    episode_template: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    publishing_cadence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    platform_strategy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    success_metrics: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    target_episodes: Mapped[int] = mapped_column(Integer, default=5)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CampaignEpisode(Base):
+    __tablename__ = "campaign_episodes"
+    __table_args__ = (
+        UniqueConstraint("series_id", "episode_number", name="uq_series_episode_number"),
+        Index("idx_campaign_episodes_series", "series_id"),
+        Index("idx_campaign_episodes_status", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    series_id: Mapped[str] = mapped_column(ForeignKey("content_series.id"), nullable=False)
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), nullable=False)
+    episode_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    title: Mapped[str | None] = mapped_column(String(256))
+    objective: Mapped[str | None] = mapped_column(String(128))
+    premise: Mapped[str | None] = mapped_column(Text)
+    hook: Mapped[str | None] = mapped_column(Text)
+    narrative_role: Mapped[str | None] = mapped_column(String(64))
+    audience_role: Mapped[str | None] = mapped_column(String(64))
+    platform: Mapped[str] = mapped_column(String(64), default="instagram")
+    trend_id: Mapped[str | None] = mapped_column(String(64))
+    continuity_requirements: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    cta: Mapped[str | None] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    performance: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    orchestration_job_id: Mapped[str | None] = mapped_column(String(36))
+    strategy_opportunity_id: Mapped[str | None] = mapped_column(String(64))
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CampaignContent(Base):
+    __tablename__ = "campaign_content"
+    __table_args__ = (Index("idx_campaign_content_campaign", "campaign_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), nullable=False)
+    episode_id: Mapped[str | None] = mapped_column(ForeignKey("campaign_episodes.id"))
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    role: Mapped[str | None] = mapped_column(String(64))
+    platform: Mapped[str | None] = mapped_column(String(64))
+    sequence_position: Mapped[int | None] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(32), default="planned")
+    meta: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CampaignDependency(Base):
+    __tablename__ = "campaign_dependencies"
+    __table_args__ = (Index("idx_campaign_dependencies_campaign", "campaign_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), nullable=False)
+    source_episode_id: Mapped[str] = mapped_column(ForeignKey("campaign_episodes.id"), nullable=False)
+    target_episode_id: Mapped[str] = mapped_column(ForeignKey("campaign_episodes.id"), nullable=False)
+    dependency_type: Mapped[str] = mapped_column(String(64), default="sequence")
+    condition: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CampaignMetric(Base):
+    __tablename__ = "campaign_metrics"
+    __table_args__ = (Index("idx_campaign_metrics_campaign", "campaign_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), nullable=False)
+    series_id: Mapped[str | None] = mapped_column(String(36))
+    episode_id: Mapped[str | None] = mapped_column(String(36))
+    metric: Mapped[str] = mapped_column(String(128), nullable=False)
+    value: Mapped[float | None] = mapped_column(Numeric(18, 4))
+    period: Mapped[str | None] = mapped_column(String(64))
+    source: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CampaignDecision(Base):
+    __tablename__ = "campaign_decisions"
+    __table_args__ = (Index("idx_campaign_decisions_campaign", "campaign_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    campaign_id: Mapped[str | None] = mapped_column(ForeignKey("campaigns.id"))
+    decision_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    decision: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text)
+    expected_outcome: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    model_version: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Franchise(Base):
+    __tablename__ = "franchises"
+    __table_args__ = (Index("idx_franchises_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    campaign_id: Mapped[str | None] = mapped_column(ForeignKey("campaigns.id"))
+    series_id: Mapped[str | None] = mapped_column(ForeignKey("content_series.id"))
+    name: Mapped[str | None] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(32), default="detected")
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    performance_basis: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    source_episode_ids: Mapped[list[Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

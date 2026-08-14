@@ -33,6 +33,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Learning & Optimization Engine** | `learning_engine/` (observations, patterns, profiles, experiments, model registry) | P0 feedback loop; Content Optimization Brief; autonomy L1–2; never mutates production models in place |
 | **Trend-to-Reel Orchestration Engine** | `orchestration_engine/` (jobs, concepts, briefs, engine_runs, decision_log) | P0 connective tissue; mechanism≠surface; human gates; lineage Trend→Publish |
 | **Content Strategy & Planning Engine** | `strategy_engine/` (strategies, opportunities, plans, calendar, replan) | P0 portfolio brain; capacity-aware; dynamic replan; feeds Orchestrator |
+| **Campaign & Content Portfolio Engine** | `campaign_engine/` (campaigns, series, episodes, dependencies, franchises, decisions) | P0 coordinates programs; narrative/journey; trend injection; Levels 1–2 |
 
 ## Shared platform (current → target)
 
@@ -79,6 +80,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `LearningObservationCreated`…`OptimizationProfileUpdated` / `ModelPromoted` | `learning_engine/` |
 | `OrchestrationJobCreated`…`OrchestrationJobCompleted` / `ConceptSelected` / `ProductionBriefCreated` | `orchestration_engine/` |
 | `StrategyCreated`…`PlanReplanned` / `ContentExecutionRequested` | `strategy_engine/` |
+| `CampaignCreated`…`CampaignOptimized` / `FranchiseDetected` / `EpisodeExecutionRequested` | `campaign_engine/` |
 
 ## Extraction order (recommended)
 

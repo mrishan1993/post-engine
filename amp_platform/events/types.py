@@ -187,6 +187,26 @@ class EventType(StrEnum):
     CONTENT_EXECUTION_REQUESTED = "amp.strategy.content_execution_requested.v1"
     STRATEGY_LEARNING_RECEIVED = "amp.strategy.learning_received.v1"
     STRATEGY_OPTIMIZED = "amp.strategy.optimized.v1"
+    # Campaign & Content Portfolio Engine
+    CAMPAIGN_CREATED = "amp.campaign.created.v1"
+    CAMPAIGN_STARTED = "amp.campaign.started.v1"
+    CAMPAIGN_UPDATED = "amp.campaign.updated.v1"
+    CAMPAIGN_PAUSED = "amp.campaign.paused.v1"
+    CAMPAIGN_COMPLETED = "amp.campaign.completed.v1"
+    SERIES_CREATED = "amp.campaign.series_created.v1"
+    SERIES_VALIDATED = "amp.campaign.series_validated.v1"
+    SERIES_EXTENDED = "amp.campaign.series_extended.v1"
+    SERIES_RETIRED = "amp.campaign.series_retired.v1"
+    EPISODE_CREATED = "amp.campaign.episode_created.v1"
+    EPISODE_SCHEDULED = "amp.campaign.episode_scheduled.v1"
+    EPISODE_EXECUTION_REQUESTED = "amp.campaign.episode_execution_requested.v1"
+    EPISODE_PUBLISHED = "amp.campaign.episode_published.v1"
+    CAMPAIGN_PERFORMANCE_UPDATED = "amp.campaign.performance_updated.v1"
+    FRANCHISE_DETECTED = "amp.campaign.franchise_detected.v1"
+    FRANCHISE_APPROVED = "amp.campaign.franchise_approved.v1"
+    FRANCHISE_RETIRED = "amp.campaign.franchise_retired.v1"
+    CAMPAIGN_REPLANNED = "amp.campaign.replanned.v1"
+    CAMPAIGN_OPTIMIZED = "amp.campaign.optimized.v1"
 
 
 class TrendOpportunityCreated(BaseModel):
