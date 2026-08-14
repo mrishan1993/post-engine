@@ -48,6 +48,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `perf` | Performance & Analytics (actuals, curves, virality, benchmarks) |
 | `verify` | Verification (predicted vs actual, calibration, learning signals) |
 | `learn` | Learning & Optimization (patterns, profiles, briefs, experiments) |
+| `orchestrate` | Trend-to-Reel Orchestration (evaluate → concept → brief → produce) |
 
 ```bash
 trend v2 -v horror_narration
@@ -143,6 +144,14 @@ learn trends
 learn experiment --create
 learn train --model virality_predictor
 learn models
+
+orchestrate run --bootstrap --mode autonomous
+orchestrate run --bootstrap --brief-only
+orchestrate show <job_id>
+orchestrate approve <job_id> --gate concept
+orchestrate lineage <job_id>
+orchestrate decisions <job_id>
+orchestrate list
 ```
 
 ## Repo layout (AMP-aligned)
@@ -168,6 +177,7 @@ learn models
 | `performance_engine/` | → Performance & Analytics (actuals after publish) |
 | `verification_engine/` | → Verification (error, calibration, learning signals; not causality) |
 | `learning_engine/` | → Learning & Optimization (observations, patterns, briefs; not content gen) |
+| `orchestration_engine/` | → Trend-to-Reel Orchestration (coordinates engines; not a generator) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

@@ -2175,3 +2175,109 @@ class OptimizationRecommendation(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Trend-to-Reel Orchestration Engine (AMP)
+# Coordinates engines; never replaces Story/Generation/etc.
+# ---------------------------------------------------------------------------
+
+
+class OrchestrationJob(Base):
+    __tablename__ = "orchestration_jobs"
+    __table_args__ = (
+        Index("idx_orchestration_jobs_status", "status"),
+        Index("idx_orchestration_jobs_priority", "priority"),
+        Index("idx_orchestration_jobs_content", "content_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    trend_id: Mapped[str | None] = mapped_column(String(64))
+    opportunity_id: Mapped[int | None] = mapped_column(ForeignKey("opportunity_scores.id"))
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    character_slug: Mapped[str | None] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    current_stage: Mapped[str] = mapped_column(String(32), nullable=False)
+    priority: Mapped[float] = mapped_column(Numeric(10, 4), default=0.0)
+    mode: Mapped[str] = mapped_column(String(32), default="semi_autonomous")
+    # assisted | semi_autonomous | autonomous
+    actionability: Mapped[str | None] = mapped_column(String(16))
+    # ACT | WATCH | REJECT
+    trend_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    mechanism: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    creative_context: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    selected_concept_id: Mapped[str | None] = mapped_column(String(36))
+    backup_concept_id: Mapped[str | None] = mapped_column(String(36))
+    production_brief_id: Mapped[str | None] = mapped_column(String(36))
+    approval_gate: Mapped[str | None] = mapped_column(String(32))
+    failure_reason: Mapped[str | None] = mapped_column(Text)
+    last_successful_stage: Mapped[str | None] = mapped_column(String(32))
+    retry_count: Mapped[int] = mapped_column(Integer, default=0)
+    recovery_strategy: Mapped[str | None] = mapped_column(String(64))
+    expiration_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    trend_detected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class CreativeConcept(Base):
+    __tablename__ = "creative_concepts"
+    __table_args__ = (Index("idx_creative_concepts_job", "job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    job_id: Mapped[str] = mapped_column(ForeignKey("orchestration_jobs.id"), nullable=False)
+    trend_id: Mapped[str | None] = mapped_column(String(64))
+    concept: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    score: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    score_breakdown: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    selected: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_backup: Mapped[bool] = mapped_column(Boolean, default=False)
+    rejection_reason: Mapped[str | None] = mapped_column(String(256))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ProductionBrief(Base):
+    __tablename__ = "production_briefs"
+    __table_args__ = (Index("idx_production_briefs_job", "job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    job_id: Mapped[str] = mapped_column(ForeignKey("orchestration_jobs.id"), nullable=False)
+    concept_id: Mapped[str | None] = mapped_column(ForeignKey("creative_concepts.id"))
+    brief: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class OrchestrationEngineRun(Base):
+    __tablename__ = "orchestration_engine_runs"
+    __table_args__ = (Index("idx_orchestration_engine_runs_job", "job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    job_id: Mapped[str] = mapped_column(ForeignKey("orchestration_jobs.id"), nullable=False)
+    engine_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    stage: Mapped[str] = mapped_column(String(32), nullable=False)
+    input_reference: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    output_reference: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    # QUEUED | RUNNING | COMPLETED | FAILED | BLOCKED | CANCELLED
+    duration_ms: Mapped[int | None] = mapped_column(Integer)
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class OrchestrationDecisionLog(Base):
+    __tablename__ = "orchestration_decision_log"
+    __table_args__ = (Index("idx_orchestration_decision_log_job", "job_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    job_id: Mapped[str] = mapped_column(ForeignKey("orchestration_jobs.id"), nullable=False)
+    decision_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    decision: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text)
+    score: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    model_version: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
