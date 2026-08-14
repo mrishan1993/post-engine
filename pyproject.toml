@@ -47,6 +47,7 @@ learn = "learning_engine.cli:app"
 orchestrate = "orchestration_engine.cli:app"
 strategy = "strategy_engine.cli:app"
 campaign = "campaign_engine.cli:app"
+audience = "audience_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -85,6 +86,7 @@ packages = [
     "orchestration_engine",
     "strategy_engine",
     "campaign_engine",
+    "audience_engine",
 ]
 
 [tool.pytest.ini_options]

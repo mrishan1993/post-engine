@@ -2551,3 +2551,182 @@ class Franchise(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class AudienceSegment(Base):
+    __tablename__ = "audience_segments"
+    __table_args__ = (Index("idx_audience_segments_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    criteria: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    size: Mapped[int] = mapped_column(Integer, default=0)
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    segment_kind: Mapped[str] = mapped_column(String(32), default="explicit")
+    lifecycle_stage: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudienceSignal(Base):
+    __tablename__ = "audience_signals"
+    __table_args__ = (
+        Index("idx_audience_signals_content", "content_id"),
+        Index("idx_audience_signals_type", "signal_type"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    source: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    segment_id: Mapped[str | None] = mapped_column(ForeignKey("audience_segments.id"))
+    signal_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    value: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    platform: Mapped[str | None] = mapped_column(String(64))
+    language: Mapped[str | None] = mapped_column(String(32))
+    is_noise: Mapped[bool] = mapped_column(Boolean, default=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudienceIntent(Base):
+    __tablename__ = "audience_intents"
+    __table_args__ = (Index("idx_audience_intents_type", "intent_type"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    segment_id: Mapped[str | None] = mapped_column(ForeignKey("audience_segments.id"))
+    intent_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    subject: Mapped[str | None] = mapped_column(String(512))
+    volume: Mapped[int] = mapped_column(Integer, default=1)
+    velocity: Mapped[float | None] = mapped_column(Numeric(10, 4))
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    evidence: Mapped[dict[str, Any] | list[Any] | None] = mapped_column(JSON)
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CommunityTopic(Base):
+    __tablename__ = "community_topics"
+    __table_args__ = (Index("idx_community_topics_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    topic: Mapped[str] = mapped_column(String(256), nullable=False)
+    volume: Mapped[int] = mapped_column(Integer, default=0)
+    velocity: Mapped[float | None] = mapped_column(Numeric(12, 4))
+    sentiment: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    related_content: Mapped[list[Any] | dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    keywords: Mapped[list[Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudienceDemand(Base):
+    __tablename__ = "audience_demands"
+    __table_args__ = (Index("idx_audience_demands_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    subject: Mapped[str] = mapped_column(String(512), nullable=False)
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    volume: Mapped[int] = mapped_column(Integer, default=0)
+    velocity: Mapped[float | None] = mapped_column(Numeric(10, 4))
+    strategic_fit: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    recommended_action: Mapped[str | None] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="detected")
+    audience_segments: Mapped[list[Any] | None] = mapped_column(JSON)
+    sentiment: Mapped[str | None] = mapped_column(String(32))
+    evidence: Mapped[dict[str, Any] | list[Any] | None] = mapped_column(JSON)
+    related_content: Mapped[list[Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CharacterAffinity(Base):
+    __tablename__ = "character_affinity"
+    __table_args__ = (Index("idx_character_affinity_slug", "character_slug"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    character_slug: Mapped[str] = mapped_column(String(64), nullable=False)
+    segment_id: Mapped[str | None] = mapped_column(ForeignKey("audience_segments.id"))
+    affinity_score: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    sentiment: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    trend: Mapped[str | None] = mapped_column(String(32))
+    relationships: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    memorable_traits: Mapped[list[Any] | None] = mapped_column(JSON)
+    audience_requests: Mapped[list[Any] | None] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CommunityInteraction(Base):
+    __tablename__ = "community_interactions"
+    __table_args__ = (
+        Index("idx_community_interactions_content", "content_id"),
+        Index("idx_community_interactions_noise", "is_noise"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    interaction_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    text_reference: Mapped[str | None] = mapped_column(Text)
+    text_normalized: Mapped[str | None] = mapped_column(Text)
+    segment_id: Mapped[str | None] = mapped_column(ForeignKey("audience_segments.id"))
+    intent_id: Mapped[str | None] = mapped_column(ForeignKey("audience_intents.id"))
+    intent_type: Mapped[str | None] = mapped_column(String(64))
+    sentiment: Mapped[str | None] = mapped_column(String(32))
+    emotion: Mapped[str | None] = mapped_column(String(32))
+    language: Mapped[str | None] = mapped_column(String(32))
+    priority: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    is_noise: Mapped[bool] = mapped_column(Boolean, default=False)
+    moderation_flags: Mapped[list[Any] | dict[str, Any] | None] = mapped_column(JSON)
+    entities: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CommunityAlert(Base):
+    __tablename__ = "community_alerts"
+    __table_args__ = (Index("idx_community_alerts_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    alert_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    severity: Mapped[str] = mapped_column(String(16), default="P2")
+    subject: Mapped[str | None] = mapped_column(String(512))
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    recommended_action: Mapped[str | None] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudienceOpportunity(Base):
+    __tablename__ = "audience_opportunities"
+    __table_args__ = (Index("idx_audience_opportunities_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    subject: Mapped[str] = mapped_column(String(512), nullable=False)
+    volume: Mapped[int] = mapped_column(Integer, default=0)
+    velocity: Mapped[float | None] = mapped_column(Numeric(10, 4))
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    strategic_fit: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    audience_segments: Mapped[list[Any] | None] = mapped_column(JSON)
+    sentiment: Mapped[str | None] = mapped_column(String(32))
+    recommended_action: Mapped[str | None] = mapped_column(String(64))
+    priority: Mapped[str] = mapped_column(String(8), default="P2")
+    status: Mapped[str] = mapped_column(String(32), default="detected")
+    demand_id: Mapped[str | None] = mapped_column(ForeignKey("audience_demands.id"))
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    strategy_opportunity_id: Mapped[str | None] = mapped_column(String(64))
+    campaign_episode_id: Mapped[str | None] = mapped_column(String(36))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AudienceIntelligenceSnapshot(Base):
+    __tablename__ = "audience_intelligence_snapshots"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    community_health: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+

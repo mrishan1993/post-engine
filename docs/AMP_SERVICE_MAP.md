@@ -34,6 +34,7 @@ Use this when extracting packages; do not invent parallel modules.
 | **Trend-to-Reel Orchestration Engine** | `orchestration_engine/` (jobs, concepts, briefs, engine_runs, decision_log) | P0 connective tissue; mechanism≠surface; human gates; lineage Trend→Publish |
 | **Content Strategy & Planning Engine** | `strategy_engine/` (strategies, opportunities, plans, calendar, replan) | P0 portfolio brain; capacity-aware; dynamic replan; feeds Orchestrator |
 | **Campaign & Content Portfolio Engine** | `campaign_engine/` (campaigns, series, episodes, dependencies, franchises, decisions) | P0 coordinates programs; narrative/journey; trend injection; Levels 1–2 |
+| **Audience Intelligence & Community Engine** | `audience_engine/` (signals, segments, intents, topics, demands, opportunities, alerts) | P0 listen layer; EN/HI/Hinglish; feeds Strategy/Campaign/Learning |
 
 ## Shared platform (current → target)
 
@@ -81,6 +82,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `OrchestrationJobCreated`…`OrchestrationJobCompleted` / `ConceptSelected` / `ProductionBriefCreated` | `orchestration_engine/` |
 | `StrategyCreated`…`PlanReplanned` / `ContentExecutionRequested` | `strategy_engine/` |
 | `CampaignCreated`…`CampaignOptimized` / `FranchiseDetected` / `EpisodeExecutionRequested` | `campaign_engine/` |
+| `AudienceSignalDetected`…`ContentOpportunityCreated` / `CommunityAlertCreated` | `audience_engine/` |
 
 ## Extraction order (recommended)
 

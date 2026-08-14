@@ -51,6 +51,7 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `orchestrate` | Trend-to-Reel Orchestration (evaluate → concept → brief → produce) |
 | `strategy` | Content Strategy & Planning (portfolio, calendar, replan, execute) |
 | `campaign` | Campaign & Content Portfolio (campaigns, series, episodes, franchises) |
+| `audience` | Audience Intelligence & Community (signals, demands, opportunities) |
 
 ```bash
 trend v2 -v horror_narration
@@ -192,6 +193,7 @@ strategy decisions <strategy_id>
 | `orchestration_engine/` | → Trend-to-Reel Orchestration (coordinates engines; not a generator) |
 | `strategy_engine/` | → Content Strategy & Planning (portfolio brain; not post optimizer) |
 | `campaign_engine/` | → Campaign & Content Portfolio (series/episodes/franchises; not a calendar) |
+| `audience_engine/` | → Audience Intelligence & Community (listen layer; not raw analytics) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

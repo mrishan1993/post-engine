@@ -207,6 +207,21 @@ class EventType(StrEnum):
     FRANCHISE_RETIRED = "amp.campaign.franchise_retired.v1"
     CAMPAIGN_REPLANNED = "amp.campaign.replanned.v1"
     CAMPAIGN_OPTIMIZED = "amp.campaign.optimized.v1"
+    # Audience Intelligence & Community Engine
+    AUDIENCE_SIGNAL_DETECTED = "amp.audience.signal_detected.v1"
+    AUDIENCE_SEGMENT_UPDATED = "amp.audience.segment_updated.v1"
+    AUDIENCE_INTENT_DETECTED = "amp.audience.intent_detected.v1"
+    AUDIENCE_DEMAND_DETECTED = "amp.audience.demand_detected.v1"
+    COMMUNITY_TOPIC_DETECTED = "amp.audience.community_topic_detected.v1"
+    COMMUNITY_TREND_DETECTED = "amp.audience.community_trend_detected.v1"
+    COMMUNITY_SENTIMENT_CHANGED = "amp.audience.community_sentiment_changed.v1"
+    CHARACTER_AFFINITY_CHANGED = "amp.audience.character_affinity_changed.v1"
+    CHARACTER_RELATIONSHIP_SIGNAL_DETECTED = "amp.audience.character_relationship_signal.v1"
+    CONTENT_REQUEST_DETECTED = "amp.audience.content_request_detected.v1"
+    CONTENT_OPPORTUNITY_CREATED = "amp.audience.content_opportunity_created.v1"
+    COMMUNITY_HEALTH_CHANGED = "amp.audience.community_health_changed.v1"
+    AUDIENCE_CHURN_RISK_DETECTED = "amp.audience.churn_risk_detected.v1"
+    COMMUNITY_ALERT_CREATED = "amp.audience.community_alert_created.v1"
 
 
 class TrendOpportunityCreated(BaseModel):
