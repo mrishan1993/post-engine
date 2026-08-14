@@ -42,6 +42,8 @@ assemble = "assembly_engine.cli:app"
 publish = "publishing_engine.cli:app"
 qa = "qa_engine.cli:app"
 perf = "performance_engine.cli:app"
+verify = "verification_engine.cli:app"
+learn = "learning_engine.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -75,6 +77,8 @@ packages = [
     "publishing_engine",
     "qa_engine",
     "performance_engine",
+    "verification_engine",
+    "learning_engine",
 ]
 
 [tool.pytest.ini_options]

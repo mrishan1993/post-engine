@@ -281,6 +281,16 @@ class PerformanceCollector:
             {"publication_id": receipt.id, "snapshot_id": snap.id},
             producer="performance-engine",
         )
+        # Soft handoff → Verification (does not fail collection)
+        try:
+            from verification_engine.service import VerificationService
+
+            VerificationService(self.session).verify_from_performance(
+                receipt.id,
+                simulate_age_hours=age / 3600.0 if age else None,
+            )
+        except Exception:  # noqa: BLE001
+            pass
         return snap
 
     def _upsert_analytics(

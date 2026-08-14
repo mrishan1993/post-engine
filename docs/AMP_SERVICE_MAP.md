@@ -14,8 +14,8 @@ Use this when extracting packages; do not invent parallel modules.
 | **Publishing Service** | `publishing_engine/` (+ legacy `agents/publishing_agent.py`, `providers/{youtube,instagram}`) | Executes QA-approved publishing plans; never decides creative quality |
 | **QA Service** | `qa_engine/` (+ legacy `agents/safety_qa_agent.py`, `qa/`, orchestration `qa_*`) | Multi-dimension gatekeeper; PASS/REPAIR/REGENERATE/BLOCK before Publishing |
 | **Metrics / Performance Service** | `performance_engine/` (+ legacy `metrics/collector.py`, `metrics/reporting.py`) | Actuals after publish; raw≠canonical; feeds Verification |
-| **Verification Service** | `prediction/verification.py`, `prediction/calibration.py` | Consumes metrics + predictions |
-| **Learning Service** | `prediction/learning.py`, trend feedback calibrator | Phase-3; keep thin until data volume |
+| **Verification Service** | `verification_engine/` (+ legacy `prediction/verification.py`, `prediction/calibration.py`) | Predicted vs actual; calibration; learning signals; association ≠ causation |
+| **Learning Service** | `learning_engine/` (+ legacy `prediction/learning.py`, trend feedback calibrator) | Evidence → patterns → OptimizationProfile / Content Brief; champion/challenger only |
 | **Asset Engine** | `asset_engine/` (characters, assets, resolver, memory) | Underpins Strategy + Generation; not a video generator |
 | **Story Engine** | `story_engine/` (schemas, generator, critic, patterns, service) | Narrative blueprints only; feeds Storyboard; uses Asset canon + Probability hints |
 | **Storyboard Engine** | `storyboard_engine/` (scenes, shots, audio, continuity, critic) | Visual/audio contract for Prompt/Generation; never emits provider prompts |
@@ -29,6 +29,8 @@ Use this when extracting packages; do not invent parallel modules.
 | **Publishing Engine** | `publishing_engine/` (accounts, encrypted credentials, plans, jobs, receipts, platform adapters) | P0 Instagram+YouTube (+TikTok stub); QA/policy gated; verifies posts; lineage → Performance |
 | **QA Engine** | `qa_engine/` (technical→safety dimensions, decision engine, issue routing, publishing bridge) | P0 gatekeeper; deterministic-first cascade; routes repair/regen to owner engines |
 | **Performance & Analytics Engine** | `performance_engine/` (adapters, snapshots, timeseries, retention, benchmarks, viral state) | P0 actuals; Instagram/YouTube (+TikTok stub); prediction_id lineage; does not decide causality |
+| **Verification Engine** | `verification_engine/` (runs, metric results, calibration buckets, learning signals, diagnosis) | P0 predicted vs actual; Brier/log-loss/buckets; LearningSignals for Optimization; never overwrites predictions |
+| **Learning & Optimization Engine** | `learning_engine/` (observations, patterns, profiles, experiments, model registry) | P0 feedback loop; Content Optimization Brief; autonomy L1–2; never mutates production models in place |
 
 ## Shared platform (current → target)
 
@@ -71,6 +73,8 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `SocialAccountConnected`…`PublicationVerified` / `PublishingBlocked` | `publishing_engine/` |
 | `QARunStarted`…`QARunCompleted` / `QAApproved` / `QARepairRequested` / `QARegenerationRequested` | `qa_engine/` |
 | `AnalyticsTrackingStarted`…`ViralDetected` / `PerformanceSnapshotCaptured` | `performance_engine/` |
+| `VerificationStarted`…`LearningSignalCreated` / `CalibrationUpdated` | `verification_engine/` |
+| `LearningObservationCreated`…`OptimizationProfileUpdated` / `ModelPromoted` | `learning_engine/` |
 
 ## Extraction order (recommended)
 

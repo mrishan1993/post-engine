@@ -46,6 +46,8 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `publish` | Publishing (accounts, QA-gated plans, multi-platform receipts) |
 | `qa` | QA (multi-dimension gate: PASS / REPAIR / REGENERATE / BLOCK) |
 | `perf` | Performance & Analytics (actuals, curves, virality, benchmarks) |
+| `verify` | Verification (predicted vs actual, calibration, learning signals) |
+| `learn` | Learning & Optimization (patterns, profiles, briefs, experiments) |
 
 ```bash
 trend v2 -v horror_narration
@@ -123,6 +125,24 @@ perf timeseries <publication_id> -m views
 perf retention <publication_id>
 perf benchmarks <publication_id>
 perf refresh <publication_id> --age 3600 --profile viral
+
+verify run --bootstrap
+verify show <verification_id>
+verify prediction <prediction_ref>
+verify calibration virality_predictor --version v4
+verify performance virality_predictor
+verify signals --prediction <prediction_ref>
+verify compare virality_predictor:v4 virality_predictor:v5
+
+learn run --bootstrap
+learn profile -c ravi -p instagram
+learn patterns -c ravi
+learn recommend -c ravi
+learn character ravi
+learn trends
+learn experiment --create
+learn train --model virality_predictor
+learn models
 ```
 
 ## Repo layout (AMP-aligned)
@@ -146,6 +166,8 @@ perf refresh <publication_id> --age 3600 --profile viral
 | `publishing_engine/` | → Publishing Engine (QA-gated multi-platform publish) |
 | `qa_engine/` | → QA Engine (multi-dimension gate before publish) |
 | `performance_engine/` | → Performance & Analytics (actuals after publish) |
+| `verification_engine/` | → Verification (error, calibration, learning signals; not causality) |
+| `learning_engine/` | → Learning & Optimization (observations, patterns, briefs; not content gen) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

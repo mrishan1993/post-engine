@@ -1974,3 +1974,204 @@ class AudienceSnapshot(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+# ---------------------------------------------------------------------------
+# Verification Engine — predicted vs actual → learning signals
+# (Separate from legacy verification_results tied 1:1 to predictions.id)
+# ---------------------------------------------------------------------------
+
+
+class VerificationRun(Base):
+    __tablename__ = "verification_runs"
+    __table_args__ = (
+        Index("idx_verification_runs_status", "status"),
+        Index("idx_verification_runs_publication", "publication_id"),
+        Index("idx_verification_runs_prediction", "prediction_ref"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    prediction_ref: Mapped[str] = mapped_column(String(64), nullable=False)
+    # string id OR str(int) for registry Prediction.id
+    registry_prediction_id: Mapped[int | None] = mapped_column(ForeignKey("predictions.id"))
+    publication_id: Mapped[str | None] = mapped_column(ForeignKey("publication_receipts.id"))
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    stage: Mapped[str] = mapped_column(String(32), default="primary")
+    # early | intermediate | primary | long_term
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    # pending | early_result | verified | insufficient_data | invalid
+    measurement_window: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    prediction_snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    actual_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    result_summary: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    diagnosis: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    model_id: Mapped[str | None] = mapped_column(String(128))
+    model_version: Mapped[str | None] = mapped_column(String(64))
+    lineage: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class VerificationMetricResult(Base):
+    __tablename__ = "verification_metric_results"
+    __table_args__ = (Index("idx_verification_metric_results_run", "verification_run_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    verification_run_id: Mapped[str] = mapped_column(
+        ForeignKey("verification_runs.id"), nullable=False
+    )
+    metric: Mapped[str] = mapped_column(String(128), nullable=False)
+    predicted_value: Mapped[float | None] = mapped_column(Numeric(18, 6))
+    actual_value: Mapped[float | None] = mapped_column(Numeric(18, 6))
+    absolute_error: Mapped[float | None] = mapped_column(Numeric(18, 6))
+    relative_error: Mapped[float | None] = mapped_column(Numeric(18, 6))
+    log_error: Mapped[float | None] = mapped_column(Numeric(18, 6))
+    outcome: Mapped[bool | None] = mapped_column(Boolean)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CalibrationBucket(Base):
+    __tablename__ = "calibration_buckets"
+    __table_args__ = (
+        UniqueConstraint(
+            "model_id",
+            "model_version",
+            "metric",
+            "probability_bucket",
+            "segment_key",
+            name="uq_calibration_bucket",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    model_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    model_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    metric: Mapped[str] = mapped_column(String(128), nullable=False)
+    probability_bucket: Mapped[str] = mapped_column(String(32), nullable=False)
+    segment_key: Mapped[str] = mapped_column(String(128), default="global")
+    sample_count: Mapped[int] = mapped_column(Integer, default=0)
+    mean_prediction: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    actual_success_rate: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    calibration_error: Mapped[float | None] = mapped_column(Numeric(10, 6))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class LearningSignal(Base):
+    __tablename__ = "learning_signals"
+    __table_args__ = (Index("idx_learning_signals_prediction", "prediction_ref"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    prediction_ref: Mapped[str | None] = mapped_column(String(64))
+    verification_id: Mapped[str | None] = mapped_column(ForeignKey("verification_runs.id"))
+    signal_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    signal_value: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Learning & Optimization Engine (AMP)
+# Evidence → patterns → recommendations → profiles; never mutates production models directly
+# ---------------------------------------------------------------------------
+
+
+class LearningObservation(Base):
+    __tablename__ = "learning_observations"
+    __table_args__ = (
+        Index("idx_learning_observations_content", "content_id"),
+        Index("idx_learning_observations_publication", "publication_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    publication_id: Mapped[str | None] = mapped_column(ForeignKey("publication_receipts.id"))
+    prediction_ref: Mapped[str | None] = mapped_column(String(64))
+    source_verification_id: Mapped[str | None] = mapped_column(ForeignKey("verification_runs.id"))
+    feature_vector: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    outcome_vector: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    quality_flags: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    excluded: Mapped[bool] = mapped_column(Boolean, default=False)
+    exclude_reason: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class OptimizationProfile(Base):
+    __tablename__ = "optimization_profiles"
+    __table_args__ = (Index("idx_optimization_profiles_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    scope: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    recommendations: Mapped[dict[str, Any] | list[Any]] = mapped_column(JSON, nullable=False)
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    brief: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    # active | superseded | draft
+    policy_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class OptimizationExperiment(Base):
+    __tablename__ = "optimization_experiments"
+    __table_args__ = (Index("idx_optimization_experiments_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    hypothesis: Mapped[str] = mapped_column(Text, nullable=False)
+    variable: Mapped[str] = mapped_column(String(128), nullable=False)
+    control: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    variants: Mapped[dict[str, Any] | list[Any]] = mapped_column(JSON, nullable=False)
+    target_metric: Mapped[str] = mapped_column(String(128), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="draft")
+    # draft | running | completed | cancelled
+    sample_target: Mapped[int] = mapped_column(Integer, default=30)
+    sample_count: Mapped[int] = mapped_column(Integer, default=0)
+    assignment_counts: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    results: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    scope: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class OptimizationModelVersion(Base):
+    """Champion/challenger registry — separate from legacy prediction ModelVersion."""
+
+    __tablename__ = "optimization_model_versions"
+    __table_args__ = (
+        UniqueConstraint("model_name", "version", name="uq_opt_model_name_version"),
+        Index("idx_optimization_model_versions_status", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    model_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    version: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="challenger")
+    # challenger | champion | deprecated
+    training_data_version: Mapped[str | None] = mapped_column(String(128))
+    metrics: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    weights: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    promoted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class OptimizationRecommendation(Base):
+    __tablename__ = "optimization_recommendations"
+    __table_args__ = (Index("idx_optimization_recommendations_status", "status"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    profile_id: Mapped[str | None] = mapped_column(ForeignKey("optimization_profiles.id"))
+    scope: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    target: Mapped[str] = mapped_column(String(128), nullable=False)
+    action: Mapped[str] = mapped_column(String(256), nullable=False)
+    change: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    expected_effect: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String(32), default="proposed")
+    # proposed | accepted | rejected | superseded
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
