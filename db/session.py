@@ -50,15 +50,54 @@ def reset_engine() -> None:
 def init_db(database_url: str | None = None) -> None:
     settings = get_settings()
     storage = Path(settings.storage_root)
-    for sub in ("raw", "rendered", "archive"):
+    for sub in ("raw", "rendered", "archive", "first_reel"):
         (storage / sub).mkdir(parents=True, exist_ok=True)
 
-    if (database_url or settings.database_url).startswith("sqlite"):
-        db_path = Path(str((database_url or settings.database_url).replace("sqlite:///", "")))
+    url = database_url or settings.database_url
+    if url.startswith("sqlite"):
+        db_path = Path(str(url.replace("sqlite:///", "")))
         db_path.parent.mkdir(parents=True, exist_ok=True)
 
     engine = get_engine(database_url)
     Base.metadata.create_all(bind=engine)
+    # create_all does not ALTER existing tables — sync missing columns for local SQLite
+    if url.startswith("sqlite"):
+        _sync_sqlite_columns(engine)
+
+
+def _sync_sqlite_columns(engine: Engine) -> None:
+    """Add columns present on models but missing from existing SQLite tables.
+
+    Needed because CLIs use create_all (not alembic) against a persistent local DB.
+    """
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue
+            existing = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name in existing:
+                    continue
+                # Build a conservative ADD COLUMN for SQLite
+                type_sql = col.type.compile(dialect=engine.dialect)
+                pieces = [f"ALTER TABLE {table.name} ADD COLUMN {col.name} {type_sql}"]
+                if col.server_default is not None:
+                    default = col.server_default.arg
+                    if hasattr(default, "text"):
+                        default = default.text
+                    default_s = str(default)
+                    # Quote bare string defaults
+                    if default_s and not default_s.startswith("(") and not default_s.isdigit():
+                        if not (default_s.startswith("'") or default_s.upper() in {"NULL", "CURRENT_TIMESTAMP"}):
+                            default_s = f"'{default_s}'"
+                    pieces.append(f"DEFAULT {default_s}")
+                elif not col.nullable:
+                    # SQLite cannot easily ADD NOT NULL without default — add nullable then rely on app defaults
+                    pass
+                conn.execute(text(" ".join(pieces)))
 
 
 @contextmanager

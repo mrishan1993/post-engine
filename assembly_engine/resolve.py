@@ -23,11 +23,14 @@ class MissingAssetError(Exception):
 
 def resolve_storage_uri(session: Session, artifact_id: str) -> tuple[str, dict[str, Any]]:
     """Resolve artifact_id → (uri, metadata). Never invent paths."""
+    from db.models import MediaArtifact
+
     for model, kind in (
         (VideoArtifact, "video"),
         (ImageArtifact, "image"),
         (VoiceArtifact, "voice"),
         (AudioArtifact, "audio"),
+        (MediaArtifact, "media"),
     ):
         row = session.get(model, artifact_id)
         if row:
@@ -44,7 +47,14 @@ def resolve_storage_uri(session: Session, artifact_id: str) -> tuple[str, dict[s
             if kind == "audio":
                 meta["artifact_type"] = row.artifact_type
                 meta["metadata"] = row.metadata_json
-            return row.storage_uri, meta
+            if kind == "media":
+                meta["artifact_type"] = row.artifact_type
+                meta["mime_type"] = row.mime_type
+                meta["metadata"] = row.metadata_json
+            uri = row.storage_uri
+            if not uri:
+                raise MissingAssetError([artifact_id])
+            return uri, meta
         # prefix lookup
         from sqlalchemy import select
 

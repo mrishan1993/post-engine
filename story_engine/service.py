@@ -217,6 +217,31 @@ class StoryService:
         data["name"] = char.name
         data["traits"] = (data.get("personality") or {}).get("traits") or []
         fit = 0.96 if char.status in {"active", "approved"} else 0.8
+        # Soft enrich from Universe Intelligence when character belongs to a universe
+        if char.universe_id:
+            try:
+                from universe_engine.schemas import AssembleContextRequest
+                from universe_engine.service import UniverseService
+
+                ctx = UniverseService(self.session).assemble_context(
+                    AssembleContextRequest(
+                        universe_id=char.universe_id,
+                        character_ids=[char.id],
+                        premise=(req.content_opportunity.topic if req.content_opportunity else None),
+                        memory_limit=5,
+                    )
+                )
+                data["universe_context"] = {
+                    "memories": ctx.memories,
+                    "open_threads": ctx.open_threads,
+                    "canon_constraints": ctx.canon_constraints[:8],
+                    "relationship_context": ctx.relationship_context,
+                    "current_state": (ctx.character_context[0].get("current_state") if ctx.character_context else {}),
+                    "visual_context": ctx.visual_context.get(char.slug),
+                    "voice_context": ctx.voice_context.get(char.slug),
+                }
+            except Exception:  # noqa: BLE001
+                pass
         return data, fit
 
     def _probability_hint(

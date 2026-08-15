@@ -222,6 +222,25 @@ class EventType(StrEnum):
     COMMUNITY_HEALTH_CHANGED = "amp.audience.community_health_changed.v1"
     AUDIENCE_CHURN_RISK_DETECTED = "amp.audience.churn_risk_detected.v1"
     COMMUNITY_ALERT_CREATED = "amp.audience.community_alert_created.v1"
+    # Character & Content Universe Intelligence Engine
+    UNIVERSE_UPDATED = "amp.universe.updated.v1"
+    UNIVERSE_SNAPSHOT_CREATED = "amp.universe.snapshot_created.v1"
+    CHARACTER_STATE_CHANGED = "amp.universe.character_state_changed.v1"
+    MEMORY_CREATED = "amp.universe.memory_created.v1"
+    MEMORY_UPDATED = "amp.universe.memory_updated.v1"
+    RELATIONSHIP_CREATED = "amp.universe.relationship_created.v1"
+    RELATIONSHIP_CHANGED = "amp.universe.relationship_changed.v1"
+    EVENT_CREATED = "amp.universe.event_created.v1"
+    EVENT_CANONIZED = "amp.universe.event_canonized.v1"
+    CANON_CREATED = "amp.universe.canon_created.v1"
+    CANON_UPDATED = "amp.universe.canon_updated.v1"
+    CANON_CONFLICT_DETECTED = "amp.universe.canon_conflict_detected.v1"
+    CANON_RETCONNED = "amp.universe.canon_retconned.v1"
+    STORY_THREAD_CREATED = "amp.universe.story_thread_created.v1"
+    STORY_THREAD_RESOLVED = "amp.universe.story_thread_resolved.v1"
+    CHARACTER_EXPANSION_DETECTED = "amp.universe.character_expansion_detected.v1"
+    CONTINUITY_WARNING = "amp.universe.continuity_warning.v1"
+    CONTINUITY_FAILURE = "amp.universe.continuity_failure.v1"
 
 
 class TrendOpportunityCreated(BaseModel):

@@ -35,6 +35,8 @@ Use this when extracting packages; do not invent parallel modules.
 | **Content Strategy & Planning Engine** | `strategy_engine/` (strategies, opportunities, plans, calendar, replan) | P0 portfolio brain; capacity-aware; dynamic replan; feeds Orchestrator |
 | **Campaign & Content Portfolio Engine** | `campaign_engine/` (campaigns, series, episodes, dependencies, franchises, decisions) | P0 coordinates programs; narrative/journey; trend injection; Levels 1–2 |
 | **Audience Intelligence & Community Engine** | `audience_engine/` (signals, segments, intents, topics, demands, opportunities, alerts) | P0 listen layer; EN/HI/Hinglish; feeds Strategy/Campaign/Learning |
+| **Character & Content Universe Intelligence** | `universe_engine/` (canon, memory, relationships, events, continuity, snapshots, context) | P0 persistent creative identity; Levels 1–2; feeds Story/Campaign |
+| **First Reel Production** | `first_reel/` (spec, gates, package, runner) | Vertical slice: Trend→Strategy→Campaign→Orchestrate→QA→Publish→Learn |
 
 ## Shared platform (current → target)
 
@@ -83,6 +85,7 @@ Until services are split, the in-process bus in `amp_platform/events/` is the so
 | `StrategyCreated`…`PlanReplanned` / `ContentExecutionRequested` | `strategy_engine/` |
 | `CampaignCreated`…`CampaignOptimized` / `FranchiseDetected` / `EpisodeExecutionRequested` | `campaign_engine/` |
 | `AudienceSignalDetected`…`ContentOpportunityCreated` / `CommunityAlertCreated` | `audience_engine/` |
+| `UniverseUpdated`…`ContinuityWarning` / `CanonConflictDetected` / `MemoryCreated` | `universe_engine/` |
 
 ## Extraction order (recommended)
 

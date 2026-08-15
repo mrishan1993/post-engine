@@ -48,6 +48,8 @@ orchestrate = "orchestration_engine.cli:app"
 strategy = "strategy_engine.cli:app"
 campaign = "campaign_engine.cli:app"
 audience = "audience_engine.cli:app"
+universe = "universe_engine.cli:app"
+first-reel = "first_reel.cli:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -87,6 +89,8 @@ packages = [
     "strategy_engine",
     "campaign_engine",
     "audience_engine",
+    "universe_engine",
+    "first_reel",
 ]
 
 [tool.pytest.ini_options]

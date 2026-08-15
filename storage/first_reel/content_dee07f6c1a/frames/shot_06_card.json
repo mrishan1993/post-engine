@@ -1,0 +1,16 @@
+{
+  "shot": 6,
+  "t0": 9.5,
+  "t1": 12.0,
+  "label": "PUNCHLINE",
+  "visual": "Black / sparse frame",
+  "text": "bro was actually happier.",
+  "narrative": "payoff",
+  "frame": "/Users/ishangupta/post-engine/storage/first_reel/content_dee07f6c1a/frames/shot_06_punchline.png",
+  "safe_area": {
+    "top": 180,
+    "bottom": 220,
+    "left": 64,
+    "right": 64
+  }
+}

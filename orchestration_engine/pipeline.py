@@ -192,11 +192,14 @@ def run_generation(session: Session, job: OrchestrationJob, storyboard_id: str) 
             variants=1,
             process=True,
         )
-        # Limit cost: take first request's artifacts only for V1
+        # Collect artifacts across all shot requests (not just the first)
         artifact_ids: list[str] = []
-        for req in reqs[:1]:
+        for req in reqs:
             arts = GenerationService(session).list_artifacts(req.id)
             artifact_ids.extend([a.id for a in arts])
+        # Dedupe preserve order
+        seen: set[str] = set()
+        artifact_ids = [a for a in artifact_ids if not (a in seen or seen.add(a))]
         _record_run(
             session,
             job,
@@ -206,7 +209,12 @@ def run_generation(session: Session, job: OrchestrationJob, storyboard_id: str) 
             output_reference={"artifact_ids": artifact_ids, "request_ids": [r.id for r in reqs]},
             duration_ms=int((time.perf_counter() - t0) * 1000),
         )
-        _lineage_update(job, asset_ids=artifact_ids, generation_request_ids=[r.id for r in reqs])
+        _lineage_update(
+            job,
+            asset_ids=artifact_ids,
+            generation_request_ids=[r.id for r in reqs],
+            generation_run_id=reqs[0].id if reqs else None,
+        )
         get_bus().publish(
             EventType.ORCHESTRATION_ASSETS_COMPLETED,
             {"job_id": job.id, "artifact_count": len(artifact_ids)},
@@ -250,7 +258,7 @@ def run_assembly(
             CreateAssemblyRequest(
                 content_id=job.content_id,
                 storyboard_id=storyboard_id,
-                video_artifact_ids=artifact_ids[:3] if artifact_ids else [],
+                video_artifact_ids=artifact_ids[:12] if artifact_ids else [],
                 process_render=True,
                 render_quality="final",
             )
@@ -274,7 +282,12 @@ def run_assembly(
             output_reference={"assembly_id": assembly.id, "storage_uri": storage_uri},
             duration_ms=int((time.perf_counter() - t0) * 1000),
         )
-        _lineage_update(job, assembly_id=assembly.id, render_uri=storage_uri)
+        _lineage_update(
+            job,
+            assembly_id=assembly.id,
+            assembly_run_id=assembly.id,
+            render_uri=storage_uri,
+        )
         get_bus().publish(
             EventType.ORCHESTRATION_ASSEMBLY_COMPLETED,
             {"job_id": job.id, "assembly_id": assembly.id},
@@ -323,7 +336,13 @@ def run_qa(session: Session, job: OrchestrationJob, assembly_id: str) -> str:
             output_reference={"qa_run_id": run.id, "status": status, "decision": decision},
             duration_ms=int((time.perf_counter() - t0) * 1000),
         )
-        _lineage_update(job, qa_id=run.id, qa_status=status, qa_decision=decision)
+        _lineage_update(
+            job,
+            qa_id=run.id,
+            qa_run_id=run.id,
+            qa_status=status,
+            qa_decision=decision,
+        )
         get_bus().publish(
             EventType.ORCHESTRATION_QA_COMPLETED,
             {"job_id": job.id, "qa_run_id": run.id, "status": status},
@@ -352,6 +371,7 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
         CaptionSpec,
         ConnectAccountRequest,
         CreatePlanRequest,
+        HashtagGroups,
         MediaRefs,
         PlatformTarget,
         PublishingPlanSpec,
@@ -368,7 +388,25 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
         status="RUNNING",
     )
     try:
+        # AC: do not publish merely because production finished — re-check trend freshness
         lin = job.lineage or {}
+        if lin.get("skip_publish_if_stale", True):
+            snap = job.trend_snapshot or {}
+            freshness = float(snap.get("freshness_score") or 0)
+            min_fresh = float(lin.get("min_publish_freshness") or 0.45)
+            stage = str(snap.get("trend_stage") or "").lower()
+            if job.expiration_at:
+                exp = job.expiration_at
+                if exp.tzinfo is None:
+                    exp = exp.replace(tzinfo=timezone.utc)
+                if datetime.now(timezone.utc) > exp:
+                    raise ValueError("trend_stale_at_publish: expiration_at passed")
+            if freshness < min_fresh or stage in {"saturated", "declining", "dead"}:
+                raise ValueError(
+                    f"trend_stale_at_publish: freshness={freshness} stage={stage} "
+                    f"(min_freshness={min_fresh})"
+                )
+
         storage_uri = lin.get("render_uri")
         if not storage_uri:
             raise ValueError("missing render_uri in lineage for publish")
@@ -388,6 +426,9 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
                         "duration_sec": int((brief.editing or {}).get("duration") or 12),
                         "video_codec": "h264",
                         "audio_codec": "aac",
+                        "audio_strategy": (brief.audio or {}).get("audio_strategy")
+                        or "platform_native",
+                        "trend_audio": True,
                     }
                 )
             )
@@ -402,7 +443,7 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
                 stub_oauth=True,
             )
         )
-        qa_id = lin.get("qa_id")
+        qa_id = lin.get("qa_run_id") or lin.get("qa_id")
         # Approve QA if needed for gate
         if qa_id:
             try:
@@ -411,6 +452,15 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
                 QAService(session).approve(qa_id, reviewer="orchestrator")
             except Exception:  # noqa: BLE001
                 pass
+
+        pub_req = brief.publishing_requirements or {}
+        caption_body = pub_req.get("caption") or (brief.creative or {}).get("CTA") or ""
+        caption_title = pub_req.get("title") or (brief.creative or {}).get("hook") or "Reel"
+        hashtags = pub_req.get("hashtags") or ["#nostalgia"]
+        if isinstance(hashtags, list):
+            tag_groups = HashtagGroups(trend=[str(t).lstrip("#") for t in hashtags])
+        else:
+            tag_groups = HashtagGroups()
 
         plan = svc.create_plan(
             CreatePlanRequest(
@@ -425,12 +475,15 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
                         PlatformTarget(
                             platform="instagram" if job.platform == "instagram" else job.platform,
                             account_id=acct.id,
+                            caption=caption_body,
+                            hashtags=tag_groups.flattened(),
                         )
                     ],
                     metadata=CaptionSpec(
-                        title=(brief.creative or {}).get("hook") or "Reel",
-                        body=(brief.creative or {}).get("CTA") or "",
+                        title=caption_title,
+                        body=caption_body,
                     ),
+                    hashtags=tag_groups,
                     media=MediaRefs(
                         storage_uri=storage_uri,
                         duration_sec=float((brief.editing or {}).get("duration") or 12),
@@ -446,14 +499,23 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
                     character_slug=job.character_slug,
                     lineage={
                         "orchestration_job_id": job.id,
+                        "content_id": job.content_id,
                         "trend_id": job.trend_id,
+                        "strategy_id": lin.get("strategy_id"),
+                        "campaign_id": lin.get("campaign_id"),
+                        "creative_id": lin.get("creative_id") or job.selected_concept_id,
                         "concept_id": job.selected_concept_id,
                         "story_id": lin.get("story_id"),
                         "storyboard_id": lin.get("storyboard_id"),
-                        "assembly_id": lin.get("assembly_id"),
-                        "qa_id": qa_id,
+                        "generation_run_id": lin.get("generation_run_id"),
+                        "assembly_run_id": lin.get("assembly_run_id") or lin.get("assembly_id"),
+                        "qa_run_id": qa_id,
                         "prediction_id": (job.lineage or {}).get("prediction_id") or job.id[:16],
                         "character_slug": job.character_slug,
+                        "audio_strategy": (brief.audio or {}).get("audio_strategy")
+                        or "platform_native",
+                        "trend_audio": True,
+                        "native_audio_selection": "deferred_to_operator_at_publish",
                     },
                     idempotency_key=f"orch_{job.id}",
                 ),
@@ -468,13 +530,27 @@ def run_publish(session: Session, job: OrchestrationJob, brief: ReelProductionBr
             engine_name="publishing_engine",
             stage="PUBLISHING",
             status="COMPLETED",
-            output_reference={"plan_id": plan.id, "publication_id": pub_id},
+            output_reference={
+                "plan_id": plan.id,
+                "publication_id": pub_id,
+                "audio_strategy": "platform_native",
+            },
             duration_ms=int((time.perf_counter() - t0) * 1000),
         )
-        _lineage_update(job, publication_id=pub_id, publishing_plan_id=plan.id)
+        _lineage_update(
+            job,
+            publication_id=pub_id,
+            publishing_plan_id=plan.id,
+            audio_strategy="platform_native",
+            native_audio_pending=True,
+        )
         get_bus().publish(
             EventType.ORCHESTRATION_PUBLISHED,
-            {"job_id": job.id, "publication_id": pub_id},
+            {
+                "job_id": job.id,
+                "publication_id": pub_id,
+                "audio_strategy": "platform_native",
+            },
             producer="orchestration-engine",
         )
         return pub_id
@@ -509,6 +585,7 @@ def run_measure_and_learn(session: Session, job: OrchestrationJob) -> None:
                         "orchestration_job_id": job.id,
                         "trend_id": job.trend_id,
                         "concept_id": job.selected_concept_id,
+                        "content_id": job.content_id,
                     },
                 )
             )
@@ -529,8 +606,17 @@ def run_measure_and_learn(session: Session, job: OrchestrationJob) -> None:
                     "story_type": ((job.mechanism or {}).get("mechanism")),
                     "trend_category": (job.trend_snapshot or {}).get("viral_mechanism"),
                     "orchestration_job_id": job.id,
+                    "content_id": job.content_id,
+                    "publication_id": pub_id,
+                    "strategy_id": lin.get("strategy_id"),
+                    "campaign_id": lin.get("campaign_id"),
+                    "creative_id": lin.get("creative_id"),
+                    "generation_run_id": lin.get("generation_run_id"),
+                    "assembly_run_id": lin.get("assembly_run_id"),
+                    "qa_run_id": lin.get("qa_run_id") or lin.get("qa_id"),
                     "concept_id": job.selected_concept_id,
                     "verification_stage": "primary",
+                    "first_reel": bool(lin.get("first_reel")),
                 },
                 "outcome_vector": {
                     "views": None,
@@ -543,7 +629,7 @@ def run_measure_and_learn(session: Session, job: OrchestrationJob) -> None:
         )
         get_bus().publish(
             EventType.ORCHESTRATION_LEARNING_HANDOFF,
-            {"job_id": job.id, "publication_id": pub_id},
+            {"job_id": job.id, "publication_id": pub_id, "content_id": job.content_id},
             producer="orchestration-engine",
         )
     except Exception:  # noqa: BLE001

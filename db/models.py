@@ -648,6 +648,8 @@ class Universe(Base):
     description: Mapped[str | None] = mapped_column(Text)
     rules: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     status: Mapped[str] = mapped_column(String(32), default="draft")
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    canon_mode: Mapped[str] = mapped_column(String(32), default="canon")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -2728,5 +2730,221 @@ class AudienceIntelligenceSnapshot(Base):
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     community_health: Mapped[float | None] = mapped_column(Numeric(8, 4))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Character & Content Universe Intelligence
+# ---------------------------------------------------------------------------
+
+
+class CharacterState(Base):
+    __tablename__ = "character_states"
+    __table_args__ = (Index("idx_character_states_char", "character_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    emotional_state: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    goals: Mapped[list[Any] | dict[str, Any] | None] = mapped_column(JSON)
+    fears: Mapped[list[Any] | dict[str, Any] | None] = mapped_column(JSON)
+    relationships_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    unresolved_conflicts: Mapped[list[Any] | None] = mapped_column(JSON)
+    recent_events: Mapped[list[Any] | None] = mapped_column(JSON)
+    development_stage: Mapped[str | None] = mapped_column(String(64))
+    personality_scores: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    effective_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UniverseEntity(Base):
+    __tablename__ = "universe_entities"
+    __table_args__ = (Index("idx_universe_entities_universe", "universe_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    slug: Mapped[str | None] = mapped_column(String(128))
+    attributes: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    canon_status: Mapped[str] = mapped_column(String(32), default="canon")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UniverseRelationship(Base):
+    __tablename__ = "universe_relationships"
+    __table_args__ = (
+        Index("idx_universe_relationships_universe", "universe_id"),
+        Index("idx_universe_relationships_source", "source_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    source_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    target_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    relationship_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    strength: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    traits: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    start_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    end_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    canon_status: Mapped[str] = mapped_column(String(32), default="canon")
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    history: Mapped[list[Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UniverseEvent(Base):
+    __tablename__ = "universe_events"
+    __table_args__ = (Index("idx_universe_events_universe", "universe_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    story_id: Mapped[str | None] = mapped_column(String(36))
+    episode_key: Mapped[str | None] = mapped_column(String(128))
+    timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    participants: Mapped[list[Any] | None] = mapped_column(JSON)
+    location: Mapped[str | None] = mapped_column(String(256))
+    action: Mapped[str | None] = mapped_column(String(256))
+    description: Mapped[str | None] = mapped_column(Text)
+    consequences: Mapped[list[Any] | dict[str, Any] | None] = mapped_column(JSON)
+    emotional_impact: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    affected_relationships: Mapped[list[Any] | None] = mapped_column(JSON)
+    canon_status: Mapped[str] = mapped_column(String(32), default="provisional")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CreativeMemory(Base):
+    __tablename__ = "creative_memories"
+    __table_args__ = (Index("idx_creative_memories_char", "character_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    character_id: Mapped[str | None] = mapped_column(ForeignKey("characters.id"))
+    event_id: Mapped[str | None] = mapped_column(ForeignKey("universe_events.id"))
+    memory_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    importance: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    emotional_weight: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    recency: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    recall_probability: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    canon_status: Mapped[str] = mapped_column(String(32), default="canon")
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CanonFact(Base):
+    __tablename__ = "canon_facts"
+    __table_args__ = (
+        Index("idx_canon_facts_universe", "universe_id"),
+        Index("idx_canon_facts_subject", "subject"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    subject: Mapped[str] = mapped_column(String(256), nullable=False)
+    predicate: Mapped[str] = mapped_column(String(128), nullable=False)
+    object: Mapped[str] = mapped_column(String(512), nullable=False)
+    source: Mapped[str | None] = mapped_column(String(256))
+    confidence: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    status: Mapped[str] = mapped_column(String(32), default="canon")
+    authority: Mapped[str | None] = mapped_column(String(64))
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoryThread(Base):
+    __tablename__ = "story_threads"
+    __table_args__ = (Index("idx_story_threads_universe", "universe_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    participants: Mapped[list[Any] | None] = mapped_column(JSON)
+    importance: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    audience_interest: Mapped[float | None] = mapped_column(Numeric(5, 4))
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    potential_payoff: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UniverseSnapshot(Base):
+    __tablename__ = "universe_snapshots"
+    __table_args__ = (Index("idx_universe_snapshots_universe", "universe_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    campaign_id: Mapped[str | None] = mapped_column(String(36))
+    episode_id: Mapped[str | None] = mapped_column(String(36))
+    label: Mapped[str | None] = mapped_column(String(256))
+    snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ContinuityConflict(Base):
+    __tablename__ = "continuity_conflicts"
+    __table_args__ = (Index("idx_continuity_conflicts_universe", "universe_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str] = mapped_column(ForeignKey("universes.id"), nullable=False)
+    severity: Mapped[str] = mapped_column(String(16), default="warning")
+    conflict_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    proposed: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    existing: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    suggested_revision: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(32), default="open")
+    resolution: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CreativeDecision(Base):
+    __tablename__ = "creative_decisions"
+    __table_args__ = (Index("idx_creative_decisions_universe", "universe_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    universe_id: Mapped[str | None] = mapped_column(String(36))
+    entity_id: Mapped[str | None] = mapped_column(String(36))
+    change: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text)
+    source: Mapped[str | None] = mapped_column(String(64))
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    approved_by: Mapped[str | None] = mapped_column(String(64))
+    model_version: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CharacterPerception(Base):
+    __tablename__ = "character_perceptions"
+    __table_args__ = (Index("idx_character_perceptions_char", "character_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    universe_id: Mapped[str | None] = mapped_column(ForeignKey("universes.id"))
+    perceived_traits: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    affinity: Mapped[float | None] = mapped_column(Numeric(8, 4))
+    sentiment: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    theories: Mapped[list[Any] | None] = mapped_column(JSON)
+    requests: Mapped[list[Any] | None] = mapped_column(JSON)
+    source: Mapped[str] = mapped_column(String(64), default="audience")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class CharacterAppearance(Base):
+    __tablename__ = "character_appearances"
+    __table_args__ = (Index("idx_character_appearances_char", "character_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    universe_id: Mapped[str | None] = mapped_column(ForeignKey("universes.id"))
+    content_id: Mapped[str | None] = mapped_column(String(64))
+    episode_key: Mapped[str | None] = mapped_column(String(128))
+    role: Mapped[str | None] = mapped_column(String(64))
+    appeared_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

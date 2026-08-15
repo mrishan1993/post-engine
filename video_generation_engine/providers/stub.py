@@ -140,21 +140,49 @@ class StubVideoProvider(VideoGenerationProvider):
                 w, h = int(parts[0]), int(parts[1])
             except ValueError:
                 pass
+        from amp_platform.procedural_media import (
+            infer_shot_label,
+            materialize_mp4,
+            materialize_png,
+            resolve_ffmpeg,
+        )
+
+        prompt = ((request.get("prompt") or {}).get("positive") or "")[:400]
+        dur = float(gen.get("duration_sec") or 2.5)
+        fps = int(gen.get("fps") or 30)
         payload = {
             "stub": True,
+            "procedural": True,
             "provider": self.name,
             "job_id": job_id,
             "seed": seed,
-            "duration_sec": gen.get("duration_sec"),
+            "duration_sec": dur,
             "aspect_ratio": gen.get("aspect_ratio"),
             "width": w,
             "height": h,
-            "fps": gen.get("fps"),
-            "prompt": ((request.get("prompt") or {}).get("positive") or "")[:400],
+            "fps": fps,
+            "prompt": prompt,
             "mode": gen.get("mode"),
             "camera": request.get("camera"),
+            "video_codec": "h264",
+            "mime_type": "video/mp4",
         }
-        path.write_bytes(("AMP_VIDEO_STUB\n" + json.dumps(payload, indent=2)).encode("utf-8"))
-        # Sidecar JSON for technical validation without ffprobe
+        label = infer_shot_label(prompt)
+        if resolve_ffmpeg():
+            materialize_mp4(
+                path,
+                width=w,
+                height=h,
+                duration_sec=dur,
+                prompt=prompt,
+                seed=seed,
+                label=label,
+                text=prompt.strip().split("\n")[0][:42] if prompt else None,
+            )
+        else:
+            still = path.with_suffix(".png")
+            materialize_png(still, width=w, height=h, prompt=prompt, seed=seed, label=label)
+            # Without ffmpeg, keep meta so QA can probe; leave a real PNG path referenced
+            path.write_bytes(still.read_bytes())
         path.with_suffix(".meta.json").write_text(json.dumps(payload), encoding="utf-8")
         return str(path)

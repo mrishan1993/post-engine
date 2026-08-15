@@ -27,6 +27,15 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str | None = Field(default=None, alias="ELEVENLABS_API_KEY")
     elevenlabs_voice_id: str | None = Field(default=None, alias="ELEVENLABS_VOICE_ID")
     suno_api_key: str | None = Field(default=None, alias="SUNO_API_KEY")
+
+    # Image / video generation (wire providers when keys are present)
+    fal_key: str | None = Field(default=None, alias="FAL_KEY")
+    replicate_api_token: str | None = Field(default=None, alias="REPLICATE_API_TOKEN")
+    openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
+    midjourney_api_key: str | None = Field(default=None, alias="MIDJOURNEY_API_KEY")
+    google_api_key: str | None = Field(default=None, alias="GOOGLE_API_KEY")
+    runway_api_key: str | None = Field(default=None, alias="RUNWAY_API_KEY")
+
     youtube_api_key: str | None = Field(default=None, alias="YOUTUBE_API_KEY")
     youtube_client_id: str | None = Field(default=None, alias="YOUTUBE_CLIENT_ID")
     youtube_client_secret: str | None = Field(default=None, alias="YOUTUBE_CLIENT_SECRET")

@@ -143,8 +143,12 @@ class StubImageProvider(ImageGenerationProvider):
                 w, h = int(parts[0]), int(parts[1])
             except ValueError:
                 pass
+        from amp_platform.procedural_media import infer_shot_label, materialize_png
+
+        prompt = ((request.get("prompt") or {}).get("positive") or "")[:400]
         payload = {
             "stub": True,
+            "procedural": True,
             "provider": self.name,
             "job_id": job_id,
             "seed": seed,
@@ -152,13 +156,18 @@ class StubImageProvider(ImageGenerationProvider):
             "width": w,
             "height": h,
             "mime_type": "image/png",
-            "prompt": ((request.get("prompt") or {}).get("positive") or "")[:400],
+            "prompt": prompt,
             "mode": gen.get("mode"),
             "purpose": request.get("purpose"),
             "edit": request.get("edit"),
         }
-        # Minimal valid-ish PNG header + stub payload (validation uses sidecar)
-        marker = b"AMP_IMAGE_STUB\n" + json.dumps(payload, indent=2).encode("utf-8")
-        path.write_bytes(marker)
+        materialize_png(
+            path,
+            width=w,
+            height=h,
+            prompt=prompt,
+            seed=seed,
+            label=infer_shot_label(prompt),
+        )
         path.with_suffix(".meta.json").write_text(json.dumps(payload), encoding="utf-8")
         return str(path)

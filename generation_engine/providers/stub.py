@@ -122,6 +122,13 @@ class StubGenerationProvider(GenerationProvider):
         modality: str,
         seed: int | None,
     ) -> str:
+        from amp_platform.procedural_media import (
+            infer_shot_label,
+            materialize_mp4,
+            materialize_png,
+            resolve_ffmpeg,
+        )
+
         settings = get_settings()
         root = Path(settings.storage_root) / "generated" / self.name
         root.mkdir(parents=True, exist_ok=True)
@@ -134,16 +141,50 @@ class StubGenerationProvider(GenerationProvider):
             "sfx": "wav",
         }.get(modality, "bin")
         path = root / f"{job_id}.{ext}"
+        prompt = prompt_package.get("positive_prompt") or ""
+        params = prompt_package.get("parameters") or {}
         payload = {
             "provider": self.name,
             "job_id": job_id,
             "modality": modality,
             "seed": seed,
-            "prompt": (prompt_package.get("positive_prompt") or "")[:500],
-            "parameters": prompt_package.get("parameters") or {},
+            "prompt": prompt[:500],
+            "parameters": params,
             "stub": True,
+            "procedural": True,
         }
-        # Minimal valid-ish placeholder bytes (not a real media container)
-        body = ("AMP_STUB_ARTIFACT\n" + json.dumps(payload, indent=2)).encode("utf-8")
-        path.write_bytes(body)
+        label = infer_shot_label(prompt)
+        if modality in {"image", "thumbnail"}:
+            w = int(params.get("width") or 1080)
+            h = int(params.get("height") or 1920)
+            materialize_png(path, width=w, height=h, prompt=prompt, seed=seed, label=label)
+        elif modality == "video":
+            w = int(params.get("width") or 1080)
+            h = int(params.get("height") or 1920)
+            dur = float(params.get("duration_sec") or 2.5)
+            if resolve_ffmpeg():
+                materialize_mp4(
+                    path,
+                    width=w,
+                    height=h,
+                    duration_sec=dur,
+                    prompt=prompt,
+                    seed=seed,
+                    label=label,
+                    text=prompt.strip().split("\n")[0][:42] if prompt else None,
+                )
+            else:
+                # Still emit a real PNG sidecar path renamed — last resort write png bytes with meta
+                still = path.with_suffix(".png")
+                materialize_png(still, width=w, height=h, prompt=prompt, seed=seed, label=label)
+                path.write_bytes(still.read_bytes())
+        else:
+            # Audio modalities: tiny silent-ish placeholder with meta sidecar
+            path.write_bytes(b"RIFF$\x00\x00\x00WAVEfmt ")
+            path.with_suffix(".meta.json").write_text(json.dumps(payload), encoding="utf-8")
+            return str(path)
+        path.with_suffix(".meta.json").write_text(
+            json.dumps({**payload, "width": params.get("width", 1080), "height": params.get("height", 1920)}, indent=2),
+            encoding="utf-8",
+        )
         return str(path)

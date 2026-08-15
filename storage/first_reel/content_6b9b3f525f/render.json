@@ -1,0 +1,14 @@
+{
+  "render_uri": "/Users/ishangupta/post-engine/storage/first_reel/content_6b9b3f525f/first_reel_2016_phone.mp4",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "duration_sec": 13.0,
+  "audio": null,
+  "audio_strategy": "platform_native",
+  "ffmpeg": "/Users/ishangupta/post-engine/storage/bin/ffmpeg",
+  "ffmpeg_used": true,
+  "silent_master": true,
+  "visual_kind": "procedural_phone_cam",
+  "note": "Silent master \u2014 attach trending platform-native audio at Instagram publish."
+}

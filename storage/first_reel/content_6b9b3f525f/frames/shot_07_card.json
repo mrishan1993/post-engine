@@ -1,0 +1,17 @@
+{
+  "shot": 7,
+  "t0": 12.0,
+  "t1": 13.0,
+  "label": "LOOP",
+  "visual": "Return to phone unlock (loop)",
+  "text": "POV: You find your 2016 phone",
+  "narrative": "loop",
+  "frame": "/Users/ishangupta/post-engine/storage/first_reel/content_6b9b3f525f/frames/shot_07_loop.png",
+  "visual_kind": "procedural_phone_cam",
+  "safe_area": {
+    "top": 180,
+    "bottom": 220,
+    "left": 64,
+    "right": 64
+  }
+}

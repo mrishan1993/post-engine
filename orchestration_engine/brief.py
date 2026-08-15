@@ -44,17 +44,24 @@ def build_production_brief(
             "character_requirements": [concept.character_role],
         },
         audio={
-            "audio_type": (opportunity.audio or {}).get("type") or "original_or_bed",
+            "audio_strategy": (opportunity.audio or {}).get("audio_strategy")
+            or "platform_native",
+            "trend_audio": bool((opportunity.audio or {}).get("trend_audio", True)),
+            "audio_type": (opportunity.audio or {}).get("type") or "platform_native_trend",
             "audio_reference": (opportunity.audio or {}).get("reference_id"),
             "voice_requirements": concept.audio_direction,
-            # Mechanism over surface audio copy
-            "note": "Prefer mechanism-aligned audio; do not require copying trending audio",
+            # Do not bake rights-risky downloads into production — select at publish
+            "note": (
+                "platform_native + trend_audio: attach current native trend audio "
+                "at publishing time; do not require copying trending audio files"
+            ),
         },
         editing={
             "duration": duration,
             "pacing": mechanism.get("editing_pattern"),
             "transitions": "cut",
             "caption_style": "bottom_safe_bold",
+            "loop": True,
         },
         qa_requirements={
             "character_consistency": True,
@@ -64,11 +71,15 @@ def build_production_brief(
             "aspect_ratio": "9:16",
             "narrative_completeness": True,
             "platform_compliance": True,
+            "first_frame_hook": True,
+            "hook_without_audio": True,
         },
         publishing_requirements={
             "platform": opportunity.platform,
             "require_qa": True,
             "caption_seed": concept.hook,
+            "audio_strategy": "platform_native",
+            "trend_audio": True,
         },
         optimization_profile=optimization_profile,
         mechanism=mechanism,

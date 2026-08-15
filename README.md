@@ -52,6 +52,8 @@ Stub providers are on by default (`PIPELINE_STUB_PROVIDERS=true`).
 | `strategy` | Content Strategy & Planning (portfolio, calendar, replan, execute) |
 | `campaign` | Campaign & Content Portfolio (campaigns, series, episodes, franchises) |
 | `audience` | Audience Intelligence & Community (signals, demands, opportunities) |
+| `universe` | Character & Content Universe Intelligence (canon, memory, continuity) |
+| `first-reel` | First Reel vertical slice (Trend→Publish→Learn; 2016 nostalgia POV) |
 
 ```bash
 trend v2 -v horror_narration
@@ -194,6 +196,8 @@ strategy decisions <strategy_id>
 | `strategy_engine/` | → Content Strategy & Planning (portfolio brain; not post optimizer) |
 | `campaign_engine/` | → Campaign & Content Portfolio (series/episodes/franchises; not a calendar) |
 | `audience_engine/` | → Audience Intelligence & Community (listen layer; not raw analytics) |
+| `universe_engine/` | → Character & Content Universe Intelligence (canon/memory; not a generator) |
+| `first_reel/` | → First Reel production hardening (vertical slice; composes engines) |
 | `agents/`, `rigs/`, `orchestration/` | → Legacy pipeline + QA + Publishing |
 | `metrics/` | → Metrics service |
 | `services/`, `apps/`, `shared/`, `infrastructure/` | Target mono-repo homes (scaffolded) |

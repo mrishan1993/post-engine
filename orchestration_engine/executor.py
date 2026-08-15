@@ -66,12 +66,23 @@ class OrchestrationExecutor:
             priority=compute_priority(opportunity),
             mode=req.mode,
             trend_snapshot=opportunity.model_dump(),
-            lineage={"content_id": content_id, "trend_id": opportunity.trend_id},
+            lineage={
+                "content_id": content_id,
+                "trend_id": opportunity.trend_id,
+                **(req.lineage_extras or {}),
+            },
             trend_detected_at=now,
             expiration_at=estimate_expiration(opportunity, now=now),
             created_at=now,
             updated_at=now,
         )
+        # Persist first-reel hardening knobs on job via lineage
+        lin0 = dict(job.lineage or {})
+        if req.creative_override:
+            lin0["creative_override"] = req.creative_override
+        lin0["skip_publish_if_stale"] = req.skip_publish_if_stale
+        lin0["min_publish_freshness"] = req.min_publish_freshness
+        job.lineage = lin0
         self.session.add(job)
         self.session.flush()
         self._log(job, "job_created", {"content_id": content_id, "trend_id": opportunity.trend_id})
@@ -252,6 +263,17 @@ class OrchestrationExecutor:
                 optimization_profile=(job.creative_context or {}).get("optimization_profile"),
                 creative_context=job.creative_context,
             )
+            # First-reel / vertical-slice creative override (hook, caption, shots, audio)
+            override = dict((job.lineage or {}).get("creative_override") or {})
+            if override:
+                brief = brief.model_copy(deep=True)
+                for section in ("creative", "visual", "audio", "editing", "qa_requirements", "publishing_requirements"):
+                    if section in override and isinstance(override[section], dict):
+                        merged = dict(getattr(brief, section) or {})
+                        merged.update(override[section])
+                        setattr(brief, section, merged)
+                if "objective" in override:
+                    brief.objective = str(override["objective"])
             pb = ProductionBrief(
                 id=str(uuid4()),
                 job_id=job.id,
@@ -266,6 +288,7 @@ class OrchestrationExecutor:
             lin.update(
                 {
                     "concept_id": concept.concept_id,
+                    "creative_id": concept.concept_id,
                     "concept_score": concept.score,
                     "production_brief_id": pb.id,
                     "opportunity_score": opportunity.opportunity_score,

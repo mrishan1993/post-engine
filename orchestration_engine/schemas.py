@@ -125,6 +125,11 @@ class CreateJobRequest(BaseModel):
     concept_count: int = 5
     thresholds: ActionabilityThresholds | None = None
     score_weights: ConceptScoreWeights | None = None
+    # First-reel / vertical-slice hardening
+    lineage_extras: dict[str, Any] = Field(default_factory=dict)
+    creative_override: dict[str, Any] = Field(default_factory=dict)
+    skip_publish_if_stale: bool = True
+    min_publish_freshness: float = 0.45
 
 
 class ApproveJobRequest(BaseModel):
