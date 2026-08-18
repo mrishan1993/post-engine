@@ -1,0 +1,16 @@
+{
+  "provider": "veo",
+  "job_id": "veo_5d3a339ad961",
+  "modality": "video",
+  "seed": 630517,
+  "prompt": "medium shot, eye level, static. Ghost Kid Would you have opened the door?, expression: unease. Environment: Primary Location. State: lighting=medium, atmosphere=neutral, environment_state=dark. Lighting: {'direction': 'side', 'intensity': 'medium', 'style': 'naturalistic'}. Composition: {'framing': 'center', 'subject_position': 'foreground'}. Objective: comments. Do not invent new characters, props, or locations not in the specification. Maintain the exact facial identity, hairstyle, clothing si",
+  "parameters": {
+    "duration_sec": 2.7,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920"
+  },
+  "stub": true,
+  "procedural": true,
+  "width": 1080,
+  "height": 1920
+}

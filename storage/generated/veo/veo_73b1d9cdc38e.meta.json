@@ -1,0 +1,16 @@
+{
+  "provider": "veo",
+  "job_id": "veo_73b1d9cdc38e",
+  "modality": "video",
+  "seed": 471033,
+  "prompt": "close up shot, eye level, static. Ghost Kid Payoff: The voice is coming from Ghost Kid's own phone. The date on screen is tomorrow., expression: unease. Environment: Primary Location. State: lighting=medium, atmosphere=neutral, environment_state=dark. Lighting: {'direction': 'side', 'intensity': 'medium', 'style': 'naturalistic'}. Composition: {'framing': 'center', 'subject_position': 'foreground'}. Objective: Pay off setup. Do not invent new characters, props, or locations not in the specificat",
+  "parameters": {
+    "duration_sec": 1.0,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920"
+  },
+  "stub": true,
+  "procedural": true,
+  "width": 1080,
+  "height": 1920
+}

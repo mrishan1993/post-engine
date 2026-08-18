@@ -30,6 +30,11 @@ def run_cmd(
     bootstrap: bool = typer.Option(True, "--bootstrap/--no-bootstrap"),
     character: str = typer.Option("ghost_kid", "--character", "-c"),
     render: bool = typer.Option(True, "--render/--no-render", help="Render silent 9:16 MP4 after package"),
+    live: bool = typer.Option(
+        False,
+        "--live/--procedural",
+        help="Generate stills with live image APIs (Replicate/Gemini) instead of procedural plates",
+    ),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """Produce Reel #1 through the real pipeline (2016 nostalgia POV)."""
@@ -38,7 +43,7 @@ def run_cmd(
         raise typer.Exit(1)
     _init()
     with get_session() as session:
-        result = run_first_reel(session, character_slug=character, publish=True)
+        result = run_first_reel(session, character_slug=character, publish=True, live=live)
         render_info = None
         if render and result.get("package"):
             pkg_path = Path((result["package"]).get("package_path") or "")
@@ -118,6 +123,32 @@ def spec_cmd(json_out: bool = typer.Option(True, "--json/--pretty")) -> None:
         console.print_json(data=spec)
     else:
         console.print(Panel(str(spec), title=spec["name"]))
+
+
+@app.command("health")
+def health_cmd(json_out: bool = typer.Option(False, "--json")) -> None:
+    """Probe configured generation/publish keys (no secrets printed)."""
+    from first_reel.live import probe_tools
+
+    rows = probe_tools()
+    if json_out:
+        console.print_json(data=rows)
+        return
+    table = Table(title="First Reel tool health")
+    table.add_column("Tool")
+    table.add_column("Role")
+    table.add_column("OK")
+    table.add_column("Detail")
+    table.add_column("Bypass")
+    for row in rows:
+        table.add_row(
+            str(row["name"]),
+            str(row["role"]),
+            "yes" if row["ok"] else ("skip" if not row["configured"] else "no"),
+            str(row["detail"]),
+            str(row["bypass"]),
+        )
+    console.print(table)
 
 
 if __name__ == "__main__":

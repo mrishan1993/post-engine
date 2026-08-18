@@ -1,0 +1,16 @@
+{
+  "provider": "veo",
+  "job_id": "veo_64e551bf923f",
+  "modality": "video",
+  "seed": 360183,
+  "prompt": "medium shot, eye level, dolly in. Ghost Kid notices a detail that shouldn't be there, expression: fear. Environment: Primary Location. State: lighting=medium, atmosphere=neutral, environment_state=dark. Lighting: {'direction': 'side', 'intensity': 'medium', 'style': 'naturalistic'}. Composition: {'framing': 'center', 'subject_position': 'foreground'}. Objective: Establish context. Do not invent new characters, props, or locations not in the specification. Maintain the exact facial identity, hair",
+  "parameters": {
+    "duration_sec": 0.8,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920"
+  },
+  "stub": true,
+  "procedural": true,
+  "width": 1080,
+  "height": 1920
+}

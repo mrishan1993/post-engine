@@ -1,0 +1,16 @@
+{
+  "provider": "veo",
+  "job_id": "veo_3b1bdf7b6de0",
+  "modality": "video",
+  "seed": 120324,
+  "prompt": "insert shot, high angle, static. Ghost Kid The voice is coming from Ghost Kid's own phone., expression: unease. Environment: Primary Location. State: lighting=medium, atmosphere=neutral, environment_state=dark. Lighting: {'direction': 'side', 'intensity': 'medium', 'style': 'naturalistic'}. Composition: {'framing': 'center', 'subject_position': 'foreground'}. Objective: Recontextualize prior information. Do not invent new characters, props, or locations not in the specification. Maintain the exa",
+  "parameters": {
+    "duration_sec": 2.3,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920"
+  },
+  "stub": true,
+  "procedural": true,
+  "width": 1080,
+  "height": 1920
+}

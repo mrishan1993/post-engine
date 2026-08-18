@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -105,6 +106,7 @@ def run_first_reel(
     character_slug: str = "ghost_kid",
     publish: bool = True,
     write_package: bool = True,
+    live: bool = False,
 ) -> dict[str, Any]:
     """Vertical slice: Trend → Strategy → Campaign → Orchestrate → QA → Publish → Learn."""
     seed_from_v2_config(session)
@@ -246,7 +248,21 @@ def run_first_reel(
                 "stage": job.current_stage,
                 "publication_id": lineage.get("publication_id"),
             },
+            live=live,
         )
+        if live:
+            try:
+                from first_reel.live import generate_voiceover
+
+                vo = generate_voiceover(out)
+                if vo and package_info.get("package") is not None:
+                    package_info["package"]["voiceover"] = vo
+                    pkg_path = Path(package_info["package_path"])
+                    pkg_path.write_text(
+                        json.dumps(package_info["package"], indent=2, default=str)
+                    )
+            except Exception as exc:  # noqa: BLE001
+                package_info["voiceover_error"] = str(exc)
 
     learning = None
     if lineage.get("publication_id") or job.status in {"PUBLISHED", "MEASURING", "LEARNING"}:

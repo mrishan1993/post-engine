@@ -133,7 +133,12 @@ def _render_shot_clip(
         raise RuntimeError(proc.stderr[-2000:] if proc.stderr else "ffmpeg shot render failed")
 
 
-def render_package_dir(package_dir: Path, *, out_name: str = "first_reel_2016_phone.mp4") -> dict[str, Any]:
+def render_package_dir(
+    package_dir: Path,
+    *,
+    out_name: str = "first_reel_2016_phone.mp4",
+    regenerate_plates: bool | None = None,
+) -> dict[str, Any]:
     """Render a silent 9:16 MP4 from an existing first-reel package directory."""
     package_dir = Path(package_dir)
     pkg_path = package_dir / "reel_package.json"
@@ -149,12 +154,20 @@ def render_package_dir(package_dir: Path, *, out_name: str = "first_reel_2016_ph
     package = json.loads(pkg_path.read_text())
     frames_meta = package.get("frames") or []
     shots = package.get("spec", {}).get("shots") or SHOTS
+    visual_kind = str(package.get("visual_kind") or "")
+    if not visual_kind and frames_meta:
+        visual_kind = str(frames_meta[0].get("visual_kind") or "")
 
-    # Always regenerate plates so old solid-color packages upgrade in place
-    from first_reel.plates import write_shot_frames
+    # Upgrade old solid-color packages in place, but never overwrite live API stills.
+    if regenerate_plates is None:
+        regenerate_plates = visual_kind not in {"live_api", "replicate", "fal", "openai", "gemini"}
+    if regenerate_plates:
+        from first_reel.plates import write_shot_frames
 
-    frames_meta = write_shot_frames(package_dir / "frames")
-    package["frames"] = frames_meta
+        frames_meta = write_shot_frames(package_dir / "frames")
+        package["frames"] = frames_meta
+        visual_kind = "procedural_phone_cam"
+        package["visual_kind"] = visual_kind
 
     frame_by_shot: dict[int, Path] = {}
     for item in frames_meta:
@@ -217,14 +230,21 @@ def render_package_dir(package_dir: Path, *, out_name: str = "first_reel_2016_ph
         "ffmpeg": ffmpeg,
         "ffmpeg_used": True,
         "silent_master": True,
-        "visual_kind": "procedural_phone_cam",
+        "visual_kind": visual_kind or "procedural_phone_cam",
         "note": "Silent master — attach trending platform-native audio at Instagram publish.",
     }
     package["render"] = render_info
-    package["note"] = (
-        "Rendered silent 9:16 phone-cam reel (procedural plates + motion). "
-        "Native trend audio attaches at publish."
-    )
+    package["visual_kind"] = visual_kind or "procedural_phone_cam"
+    if visual_kind == "live_api":
+        package["note"] = (
+            "Rendered silent 9:16 reel from live API stills + motion. "
+            "Native trend audio attaches at publish."
+        )
+    else:
+        package["note"] = (
+            "Rendered silent 9:16 phone-cam reel (procedural plates + motion). "
+            "Native trend audio attaches at publish."
+        )
     pkg_path.write_text(json.dumps(package, indent=2, default=str))
     (package_dir / "render.json").write_text(json.dumps(render_info, indent=2))
     return render_info

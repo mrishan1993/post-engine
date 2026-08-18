@@ -1,0 +1,16 @@
+{
+  "provider": "veo",
+  "job_id": "veo_ce968d808d61",
+  "modality": "video",
+  "seed": 214373,
+  "prompt": "pov shot, eye level, handheld. Ghost Kid Ghost Kid hears something impossible at the forgotten room., expression: unease. Environment: Primary Location. State: lighting=medium, atmosphere=neutral, environment_state=dark. Lighting: {'direction': 'side', 'intensity': 'medium', 'style': 'naturalistic'}. Composition: {'framing': 'center', 'subject_position': 'foreground'}. Objective: Create immediate curiosity / retention. Do not invent new characters, props, or locations not in the specification. M",
+  "parameters": {
+    "duration_sec": 2.95,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920"
+  },
+  "stub": true,
+  "procedural": true,
+  "width": 1080,
+  "height": 1920
+}

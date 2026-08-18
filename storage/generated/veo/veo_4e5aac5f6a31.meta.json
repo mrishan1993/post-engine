@@ -1,0 +1,16 @@
+{
+  "provider": "veo",
+  "job_id": "veo_4e5aac5f6a31",
+  "modality": "video",
+  "seed": 643121,
+  "prompt": "medium close up shot, low angle, handheld. Ghost Kid Ghost Kid finds a second clue, expression: unease. Environment: Primary Location. State: lighting=medium, atmosphere=neutral, environment_state=dark. Lighting: {'direction': 'side', 'intensity': 'medium', 'style': 'naturalistic'}. Composition: {'framing': 'center', 'subject_position': 'foreground'}. Objective: Increase tension. Do not invent new characters, props, or locations not in the specification. Maintain the exact facial identity, hairs",
+  "parameters": {
+    "duration_sec": 1.3,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920"
+  },
+  "stub": true,
+  "procedural": true,
+  "width": 1080,
+  "height": 1920
+}

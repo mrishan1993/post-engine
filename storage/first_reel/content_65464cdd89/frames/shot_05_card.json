@@ -1,0 +1,19 @@
+{
+  "shot": 5,
+  "t0": 7.0,
+  "t1": 9.5,
+  "label": "MONTAGE",
+  "visual": "Music player, Snapchat filter, wired earphones, old IG UI",
+  "text": null,
+  "narrative": "reveal",
+  "frame": "storage/first_reel/content_65464cdd89/frames/shot_05_montage.png",
+  "visual_kind": "live_api",
+  "provider": "replicate:black-forest-labs/flux-dev",
+  "prompt": "photorealistic amateur iPhone snapshot, 2016 digital photography, fingerprint smudges on the lens, slight motion blur, visible noise/grain, harsh on-camera flash or dim bedroom lamp, not cinematic, not studio, no text overlay, no watermark, no logo, vertical 9:16 composition. Cluttered 2016 teenage bedroom desk: iPhone with white wired earphones, music player open, Polaroids, another phone showing a silly Snapchat filter, warm tungsten light, nostalgic mess.",
+  "safe_area": {
+    "top": 180,
+    "bottom": 220,
+    "left": 64,
+    "right": 64
+  }
+}

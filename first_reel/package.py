@@ -8,15 +8,23 @@ from first_reel.plates import write_shot_frames
 from first_reel.spec import reel_spec
 
 
-def write_reel_package(out_dir: Path, *, lineage: dict[str, Any], job: dict[str, Any]) -> dict[str, Any]:
+def write_reel_package(
+    out_dir: Path,
+    *,
+    lineage: dict[str, Any],
+    job: dict[str, Any],
+    live: bool = False,
+) -> dict[str, Any]:
     """Write the first-reel deliverable package (spec + phone-cam plates + lineage)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     spec = reel_spec()
-    frames = write_shot_frames(out_dir / "frames")
+    frames = write_shot_frames(out_dir / "frames", live=live)
+    visual_kind = "live_api" if live else "procedural_phone_cam"
     package = {
         "reel": "first_reel_2016_phone",
         "spec": spec,
         "frames": frames,
+        "visual_kind": visual_kind,
         "lineage": lineage,
         "job": job,
         "audio_strategy": {
@@ -39,8 +47,12 @@ def write_reel_package(out_dir: Path, *, lineage: dict[str, Any], job: dict[str,
             "trend_still_active_at_publish": True,
         },
         "note": (
-            "Procedural phone-cam plates (unlock / selfie / status / montage) — "
-            "silent master; native audio attaches at publish."
+            "Live API stills (Replicate/Gemini) — silent master; native audio attaches at publish."
+            if live
+            else (
+                "Procedural phone-cam plates (unlock / selfie / status / montage) — "
+                "silent master; native audio attaches at publish."
+            )
         ),
     }
     path = out_dir / "reel_package.json"

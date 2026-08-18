@@ -10,8 +10,12 @@ from amp_platform.procedural_media import compose_shot_plate
 from first_reel.spec import SHOTS
 
 
-def write_shot_frames(out_dir: Path) -> list[dict[str, Any]]:
+def write_shot_frames(out_dir: Path, *, live: bool = False) -> list[dict[str, Any]]:
     out_dir.mkdir(parents=True, exist_ok=True)
+    if live:
+        from first_reel.live import generate_live_frames
+
+        return generate_live_frames(out_dir)
     frames: list[dict[str, Any]] = []
     for shot in SHOTS:
         label = str(shot["label"])

@@ -1,0 +1,16 @@
+{
+  "provider": "veo",
+  "job_id": "veo_b93ea3b33137",
+  "modality": "video",
+  "seed": 597203,
+  "prompt": "over the shoulder shot, eye level, static. Ghost Kid A threat appears: an impossible voice coming from the forgotten room, expression: panic. Environment: Primary Location. State: lighting=medium, atmosphere=neutral, environment_state=dark. Lighting: {'direction': 'side', 'intensity': 'medium', 'style': 'naturalistic'}. Composition: {'framing': 'rule_of_thirds', 'subject_position': 'foreground'}. Objective: Introduce threat. Do not invent new characters, props, or locations not in the specificat",
+  "parameters": {
+    "duration_sec": 2.1,
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920"
+  },
+  "stub": true,
+  "procedural": true,
+  "width": 1080,
+  "height": 1920
+}
