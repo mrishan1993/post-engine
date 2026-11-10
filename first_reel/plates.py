@@ -1,4 +1,4 @@
-"""First-reel visual plates — phone-cam beats, not solid color cards."""
+"""Shot frame writer for First Reel — procedural or live API stills."""
 
 from __future__ import annotations
 
@@ -11,11 +11,19 @@ from first_reel.spec import SHOTS
 
 
 def write_shot_frames(out_dir: Path, *, live: bool = False) -> list[dict[str, Any]]:
+    """Write one PNG per shot. When live=True, use Replicate/FAL/OpenAI/Gemini chain."""
     out_dir.mkdir(parents=True, exist_ok=True)
     if live:
         from first_reel.live import generate_live_frames
 
-        return generate_live_frames(out_dir)
+        try:
+            frames = generate_live_frames(out_dir)
+            if frames and len(frames) >= len(SHOTS):
+                return frames
+        except Exception:  # noqa: BLE001
+            # Fall through to procedural so packaging never hard-fails
+            pass
+
     frames: list[dict[str, Any]] = []
     for shot in SHOTS:
         label = str(shot["label"])
@@ -33,5 +41,13 @@ def write_shot_frames(out_dir: Path, *, live: bool = False) -> list[dict[str, An
                 indent=2,
             )
         )
-        frames.append({"shot": shot["shot"], "frame": str(path), "card": str(card), **shot})
+        frames.append(
+            {
+                "shot": shot["shot"],
+                "frame": str(path),
+                "card": str(card),
+                "visual_kind": "procedural_phone_cam",
+                **shot,
+            }
+        )
     return frames

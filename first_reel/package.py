@@ -47,7 +47,7 @@ def write_reel_package(
             "trend_still_active_at_publish": True,
         },
         "note": (
-            "Live API stills (Replicate/Gemini) — silent master; native audio attaches at publish."
+            "Live API stills (FAL / OpenAI / Replicate) — silent master; native audio at publish."
             if live
             else (
                 "Procedural phone-cam plates (unlock / selfie / status / montage) — "

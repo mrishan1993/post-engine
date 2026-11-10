@@ -475,6 +475,24 @@ def generate_live_frames(out_dir: Path) -> list[dict[str, Any]]:
                     except Exception as exc:  # noqa: BLE001
                         last_err = f"{model}: {exc}"
 
+            if used is None and _present(settings.fal_key):
+                try:
+                    from amp_platform.fal_images import generate_image as fal_generate
+
+                    fal_generate(prompt, width=1080, height=1920, out_path=dest)
+                    used = "fal:flux-schnell"
+                except Exception as exc:  # noqa: BLE001
+                    last_err = f"fal: {exc}"
+
+            if used is None and _present(settings.openai_api_key):
+                try:
+                    from amp_platform.openai_images import generate_image as openai_generate
+
+                    openai_generate(prompt, width=1080, height=1920, out_path=dest)
+                    used = "openai:images"
+                except Exception as exc:  # noqa: BLE001
+                    last_err = f"openai: {exc}"
+
             if used is None and _present(settings.google_api_key):
                 try:
                     dest.write_bytes(_gemini_image(client, settings.google_api_key or "", prompt))

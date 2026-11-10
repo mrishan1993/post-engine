@@ -31,9 +31,9 @@ def run_cmd(
     character: str = typer.Option("ghost_kid", "--character", "-c"),
     render: bool = typer.Option(True, "--render/--no-render", help="Render silent 9:16 MP4 after package"),
     live: bool = typer.Option(
-        False,
+        True,
         "--live/--procedural",
-        help="Generate stills with live image APIs (Replicate/Gemini) instead of procedural plates",
+        help="Generate stills with live image APIs (FAL/OpenAI/Replicate) instead of procedural plates",
     ),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
