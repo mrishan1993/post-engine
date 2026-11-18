@@ -1,0 +1,16 @@
+{
+  "provider": "runway:i2v:gen4.5",
+  "errors": [
+    "shot 7: Runway out of credits \u2014 reused unlock clip for loop"
+  ],
+  "shots": 7,
+  "providers": [
+    "runway:i2v:gen4.5",
+    "runway:i2v:gen4.5",
+    "runway:i2v:gen4.5",
+    "runway:i2v:gen4.5",
+    "runway:i2v:gen4.5",
+    "runway:i2v:gen4.5",
+    "reuse:shot_02_unlock.mp4:loop_returns_to_opening"
+  ]
+}

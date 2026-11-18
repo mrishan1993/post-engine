@@ -1,0 +1,26 @@
+{
+  "render_uri": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone.mp4",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "duration_sec": 13.0,
+  "audio": {
+    "voiceover": "storage/first_reel/content_4e8f7b3d39/voiceover.mp3",
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam (premade)",
+    "music_bed": "storage/first_reel/content_4e8f7b3d39/music_bed.mp3",
+    "audio_mix": "storage/first_reel/content_4e8f7b3d39/audio_mix.m4a",
+    "silent_backup": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone_silent.mp4",
+    "with_audio": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone_with_audio.mp4",
+    "main": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone.mp4",
+    "strategy": "generated_bed_plus_elevenlabs_vo",
+    "music_prompt": "Nostalgic 2016 indie phone-memory instrumental, soft lo-fi guitar and warm pads, gentle kick, bittersweet and intimate, no vocals, vertical reel background bed, 15 seconds, clean ending",
+    "vo_text": "POV: You find your 2016 phone. bro was actually happier.. 2016 really had no business being this good \ud83d\ude2d"
+  },
+  "audio_strategy": "generated_bed_plus_vo",
+  "ffmpeg": "/Users/ishangupta/post-engine/storage/bin/ffmpeg",
+  "ffmpeg_used": true,
+  "silent_master": false,
+  "visual_kind": "live_video",
+  "note": "Silent master \u2014 attach trending platform-native audio at Instagram publish."
+}

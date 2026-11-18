@@ -1,0 +1,10 @@
+{
+  "provider": "runway",
+  "model": "gen4.5",
+  "task_id": "6a9cdc9d-34b4-42be-8aa2-63c3d21aa09e",
+  "prompt": "photorealistic amateur iPhone snapshot, 2016 digital photography, fingerprint smudges on the lens, slight motion blur, visible noise/grain, harsh on-camera flash or dim bedroom lamp, not cinematic, not studio, no text overlay, no watermark, no logo, vertical 9:16 composition. Close-up of a modern smartphone lying on rumpled bedsheets at night, lock screen glowing, fingerprints on glass, POV looking down at the phone, messy bedroom, warm lamp in the background.. Animate as short video: subtle han",
+  "duration_sec": 5,
+  "ratio": "720:1280",
+  "seed": null,
+  "mode": "image_to_video"
+}

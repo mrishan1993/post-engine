@@ -107,6 +107,8 @@ def run_first_reel(
     publish: bool = True,
     write_package: bool = True,
     live: bool = False,
+    video: bool = False,
+    prefer_video: str = "runway",
 ) -> dict[str, Any]:
     """Vertical slice: Trend → Strategy → Campaign → Orchestrate → QA → Publish → Learn."""
     seed_from_v2_config(session)
@@ -249,6 +251,8 @@ def run_first_reel(
                 "publication_id": lineage.get("publication_id"),
             },
             live=live,
+            video=video,
+            prefer_video=prefer_video,
         )
         if live:
             try:

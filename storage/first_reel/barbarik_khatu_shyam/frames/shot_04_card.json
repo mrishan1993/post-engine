@@ -1,0 +1,10 @@
+{
+  "shot": 4,
+  "label": "KRISHNA",
+  "weight": 1.1,
+  "text": "With only three arrows?",
+  "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Krishna disguised as a humble Brahmin stopping a young warrior on a dusty road, peacock-feather hint subtle, golden hour, confrontation of destiny.",
+  "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_04_krishna.png",
+  "visual_kind": "live_api",
+  "provider": "replicate:flux-schnell"
+}

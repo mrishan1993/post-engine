@@ -1,0 +1,598 @@
+{
+  "reel": "first_reel_2016_phone",
+  "spec": {
+    "name": "first_reel_2016_phone",
+    "format": "9:16",
+    "width": 1080,
+    "height": 1920,
+    "duration_sec": 13.0,
+    "duration_range": "10-14s",
+    "platform": "instagram",
+    "trend": {
+      "trend_id": "2026_is_the_new_2016",
+      "category": "nostalgia",
+      "platform": "instagram",
+      "velocity": "high",
+      "freshness": "high",
+      "velocity_score": 0.9,
+      "freshness_score": 0.88,
+      "saturation_score": 0.22,
+      "opportunity_score": 0.9,
+      "expiration_estimate": "short",
+      "source_confidence": 0.86,
+      "viral_mechanism": "nostalgia_reveal",
+      "title": "2026 is the new 2016 nostalgia wave"
+    },
+    "opportunity": {
+      "type": "trend_adaptation",
+      "concept": "POV: You find your 2016 phone",
+      "objective": "reach",
+      "format": "reel",
+      "duration": "10-14s",
+      "hook": "POV: You find your 2016 phone",
+      "audience": "young adults / nostalgia audience",
+      "priority": "P0"
+    },
+    "story": {
+      "beginning": "Present-day person discovers old phone.",
+      "escalation": "Increasingly embarrassing 2016 memories.",
+      "payoff": "Memories feel happier than the present.",
+      "loop": "Phone screen returns to opening state."
+    },
+    "shots": [
+      {
+        "shot": 1,
+        "t0": 0.0,
+        "t1": 1.5,
+        "label": "HOOK",
+        "visual": "Close-up modern phone, slightly imperfect phone-cam",
+        "text": "POV: You find your 2016 phone",
+        "narrative": "hook"
+      },
+      {
+        "shot": 2,
+        "t0": 1.5,
+        "t1": 3.0,
+        "label": "UNLOCK",
+        "visual": "Phone unlock \u2192 date 2016, old UI aesthetic",
+        "text": "2016",
+        "narrative": "setup"
+      },
+      {
+        "shot": 3,
+        "t0": 3.0,
+        "t1": 5.0,
+        "label": "SELFIE",
+        "visual": "Flash selfie, grain, 2016 colors",
+        "text": "why did I dress like this \ud83d\ude2d",
+        "narrative": "escalation"
+      },
+      {
+        "shot": 4,
+        "t0": 5.0,
+        "t1": 7.0,
+        "label": "STATUS",
+        "visual": "Old status/message bubble",
+        "text": "Life is good \u2764\ufe0f",
+        "narrative": "escalation"
+      },
+      {
+        "shot": 5,
+        "t0": 7.0,
+        "t1": 9.5,
+        "label": "MONTAGE",
+        "visual": "Music player, Snapchat filter, wired earphones, old IG UI",
+        "text": null,
+        "narrative": "reveal"
+      },
+      {
+        "shot": 6,
+        "t0": 9.5,
+        "t1": 12.0,
+        "label": "PUNCHLINE",
+        "visual": "Black / sparse frame",
+        "text": "bro was actually happier.",
+        "narrative": "payoff"
+      },
+      {
+        "shot": 7,
+        "t0": 12.0,
+        "t1": 13.0,
+        "label": "LOOP",
+        "visual": "Return to phone unlock (loop)",
+        "text": "POV: You find your 2016 phone",
+        "narrative": "loop"
+      }
+    ],
+    "audio": {
+      "audio_strategy": "platform_native",
+      "trend_audio": true,
+      "note": "Select current native Instagram trend audio at publish time"
+    },
+    "caption": "2016 really had no business being this good \ud83d\ude2d",
+    "hashtags": [
+      "#2016",
+      "#nostalgia",
+      "#2016nostalgia"
+    ],
+    "creative_direction": {
+      "style": "phone-camera imperfect nostalgia",
+      "avoid": [
+        "cinematic corporate",
+        "generic AI imagery",
+        "logo intro",
+        "heavy branding"
+      ]
+    }
+  },
+  "frames": [
+    {
+      "shot": 1,
+      "t0": 0.0,
+      "t1": 1.5,
+      "label": "HOOK",
+      "visual": "Close-up modern phone, slightly imperfect phone-cam",
+      "text": "POV: You find your 2016 phone",
+      "narrative": "hook",
+      "frame": "storage/first_reel/content_4e8f7b3d39/frames/shot_01_hook.png",
+      "clip": "storage/first_reel/content_4e8f7b3d39/frames/shot_01_hook.mp4",
+      "card": "storage/first_reel/content_4e8f7b3d39/frames/shot_01_video_card.json",
+      "visual_kind": "live_video",
+      "provider": "runway:i2v:gen4.5"
+    },
+    {
+      "shot": 2,
+      "t0": 1.5,
+      "t1": 3.0,
+      "label": "UNLOCK",
+      "visual": "Phone unlock \u2192 date 2016, old UI aesthetic",
+      "text": "2016",
+      "narrative": "setup",
+      "frame": "storage/first_reel/content_4e8f7b3d39/frames/shot_02_unlock.png",
+      "clip": "storage/first_reel/content_4e8f7b3d39/frames/shot_02_unlock.mp4",
+      "card": "storage/first_reel/content_4e8f7b3d39/frames/shot_02_video_card.json",
+      "visual_kind": "live_video",
+      "provider": "runway:i2v:gen4.5"
+    },
+    {
+      "shot": 3,
+      "t0": 3.0,
+      "t1": 5.0,
+      "label": "SELFIE",
+      "visual": "Flash selfie, grain, 2016 colors",
+      "text": "why did I dress like this \ud83d\ude2d",
+      "narrative": "escalation",
+      "frame": "storage/first_reel/content_4e8f7b3d39/frames/shot_03_selfie.png",
+      "clip": "storage/first_reel/content_4e8f7b3d39/frames/shot_03_selfie.mp4",
+      "card": "storage/first_reel/content_4e8f7b3d39/frames/shot_03_video_card.json",
+      "visual_kind": "live_video",
+      "provider": "runway:i2v:gen4.5"
+    },
+    {
+      "shot": 4,
+      "t0": 5.0,
+      "t1": 7.0,
+      "label": "STATUS",
+      "visual": "Old status/message bubble",
+      "text": "Life is good \u2764\ufe0f",
+      "narrative": "escalation",
+      "frame": "storage/first_reel/content_4e8f7b3d39/frames/shot_04_status.png",
+      "clip": "storage/first_reel/content_4e8f7b3d39/frames/shot_04_status.mp4",
+      "card": "storage/first_reel/content_4e8f7b3d39/frames/shot_04_video_card.json",
+      "visual_kind": "live_video",
+      "provider": "runway:i2v:gen4.5"
+    },
+    {
+      "shot": 5,
+      "t0": 7.0,
+      "t1": 9.5,
+      "label": "MONTAGE",
+      "visual": "Music player, Snapchat filter, wired earphones, old IG UI",
+      "text": null,
+      "narrative": "reveal",
+      "frame": "storage/first_reel/content_4e8f7b3d39/frames/shot_05_montage.png",
+      "clip": "storage/first_reel/content_4e8f7b3d39/frames/shot_05_montage.mp4",
+      "card": "storage/first_reel/content_4e8f7b3d39/frames/shot_05_video_card.json",
+      "visual_kind": "live_video",
+      "provider": "runway:i2v:gen4.5"
+    },
+    {
+      "shot": 6,
+      "t0": 9.5,
+      "t1": 12.0,
+      "label": "PUNCHLINE",
+      "visual": "Black / sparse frame",
+      "text": "bro was actually happier.",
+      "narrative": "payoff",
+      "frame": "storage/first_reel/content_4e8f7b3d39/frames/shot_06_punchline.png",
+      "clip": "storage/first_reel/content_4e8f7b3d39/frames/shot_06_punchline.mp4",
+      "card": "storage/first_reel/content_4e8f7b3d39/frames/shot_06_video_card.json",
+      "visual_kind": "live_video",
+      "provider": "runway:i2v:gen4.5"
+    },
+    {
+      "shot": 7,
+      "t0": 12.0,
+      "t1": 13.0,
+      "label": "LOOP",
+      "visual": "Return to phone unlock (loop)",
+      "text": "POV: You find your 2016 phone",
+      "narrative": "loop",
+      "frame": "storage/first_reel/content_4e8f7b3d39/frames/shot_07_loop.png",
+      "clip": "storage/first_reel/content_4e8f7b3d39/frames/shot_07_loop.mp4",
+      "card": "storage/first_reel/content_4e8f7b3d39/frames/shot_07_video_card.json",
+      "visual_kind": "live_video",
+      "provider": "reuse:shot_02_unlock.mp4:loop_returns_to_opening"
+    }
+  ],
+  "visual_kind": "live_video",
+  "lineage": {
+    "content_id": "content_4e8f7b3d39",
+    "trend_id": "2026_is_the_new_2016",
+    "first_reel": true,
+    "strategy_id": "20674d4c-bf84-45ca-bc40-dce98d5aeb73",
+    "campaign_id": "1e262f50-1c4b-4f27-875f-dae97f136f42",
+    "strategy_opportunity_id": "4035dcb0-4001-4d11-9709-89e07a6367e4",
+    "creative_override": {
+      "objective": "reach",
+      "creative": {
+        "hook": "POV: You find your 2016 phone",
+        "story": "POV find 2016 phone \u2192 unlock \u2192 selfie \u2192 status \u2192 montage \u2192 punchline 'bro was actually happier.' \u2192 loop",
+        "emotional_arc": "curiosity \u2192 cringe \u2192 warmth \u2192 loop",
+        "payoff": "bro was actually happier.",
+        "CTA": "2016 really had no business being this good \ud83d\ude2d",
+        "angle": "nostalgia_phone_pov",
+        "shots": [
+          {
+            "shot": 1,
+            "t0": 0.0,
+            "t1": 1.5,
+            "label": "HOOK",
+            "visual": "Close-up modern phone, slightly imperfect phone-cam",
+            "text": "POV: You find your 2016 phone",
+            "narrative": "hook"
+          },
+          {
+            "shot": 2,
+            "t0": 1.5,
+            "t1": 3.0,
+            "label": "UNLOCK",
+            "visual": "Phone unlock \u2192 date 2016, old UI aesthetic",
+            "text": "2016",
+            "narrative": "setup"
+          },
+          {
+            "shot": 3,
+            "t0": 3.0,
+            "t1": 5.0,
+            "label": "SELFIE",
+            "visual": "Flash selfie, grain, 2016 colors",
+            "text": "why did I dress like this \ud83d\ude2d",
+            "narrative": "escalation"
+          },
+          {
+            "shot": 4,
+            "t0": 5.0,
+            "t1": 7.0,
+            "label": "STATUS",
+            "visual": "Old status/message bubble",
+            "text": "Life is good \u2764\ufe0f",
+            "narrative": "escalation"
+          },
+          {
+            "shot": 5,
+            "t0": 7.0,
+            "t1": 9.5,
+            "label": "MONTAGE",
+            "visual": "Music player, Snapchat filter, wired earphones, old IG UI",
+            "text": null,
+            "narrative": "reveal"
+          },
+          {
+            "shot": 6,
+            "t0": 9.5,
+            "t1": 12.0,
+            "label": "PUNCHLINE",
+            "visual": "Black / sparse frame",
+            "text": "bro was actually happier.",
+            "narrative": "payoff"
+          },
+          {
+            "shot": 7,
+            "t0": 12.0,
+            "t1": 13.0,
+            "label": "LOOP",
+            "visual": "Return to phone unlock (loop)",
+            "text": "POV: You find your 2016 phone",
+            "narrative": "loop"
+          }
+        ]
+      },
+      "visual": {
+        "visual_style": "2016 phone-cam, flash, grain, Snapchat overlays",
+        "aspect_ratio": "9:16",
+        "shot_requirements": [
+          "HOOK",
+          "UNLOCK",
+          "SELFIE",
+          "STATUS",
+          "MONTAGE",
+          "PUNCHLINE",
+          "LOOP"
+        ]
+      },
+      "audio": {
+        "audio_strategy": "platform_native",
+        "trend_audio": true,
+        "note": "Select current native Instagram trend audio at publish time"
+      },
+      "editing": {
+        "duration": 13,
+        "pacing": "fast_cuts",
+        "transitions": "hard_cut",
+        "caption_style": "bottom_safe_bold_nostalgia",
+        "loop": true
+      },
+      "qa_requirements": {
+        "first_frame_hook": true,
+        "hook_without_audio": true,
+        "aspect_ratio": "9:16",
+        "duration": true,
+        "loop_works": true
+      },
+      "publishing_requirements": {
+        "platform": "instagram",
+        "require_qa": true,
+        "caption": "2016 really had no business being this good \ud83d\ude2d",
+        "title": "POV: You find your 2016 phone",
+        "hashtags": [
+          "#2016",
+          "#nostalgia",
+          "#2016nostalgia"
+        ],
+        "audio_strategy": "platform_native",
+        "trend_audio": true
+      }
+    },
+    "skip_publish_if_stale": true,
+    "min_publish_freshness": 0.45,
+    "concept_db_ids": {
+      "concept_b32854f0": "c9b17c33-bdc7-45b4-9cd9-80f19e2bb453",
+      "concept_6126845e": "d5be3dc1-4e00-453c-a04d-b013d0c43410",
+      "concept_01500c8d": "86bfc8a5-08cc-40d3-8f9c-52095522396d",
+      "concept_91e525fe": "675567fc-7a65-42cd-a676-716155954b2e",
+      "concept_b64aabce": "f621042c-46a7-413e-bfc2-d72ebc6ba227"
+    },
+    "concept_id": "concept_b64aabce",
+    "creative_id": "concept_b64aabce",
+    "concept_score": 0.8599,
+    "production_brief_id": "a45aad49-2cfb-4a9d-92d5-6f96c37c5814",
+    "opportunity_score": 0.9,
+    "trend_snapshot": {
+      "trend_id": "2026_is_the_new_2016",
+      "platform": "instagram",
+      "trend_stage": "accelerating",
+      "velocity_score": 0.9,
+      "freshness_score": 0.88,
+      "saturation_score": 0.22,
+      "opportunity_score": 0.9,
+      "viral_mechanism": "nostalgia_reveal",
+      "format": "short_form_video",
+      "title": "2026 is the new 2016 nostalgia wave",
+      "audio": {
+        "audio_strategy": "platform_native",
+        "trend_audio": true,
+        "type": "platform_native_trend"
+      },
+      "audience": [
+        "gen_z",
+        "millennials",
+        "nostalgia"
+      ],
+      "opportunity_id": null,
+      "vertical_slug": null,
+      "pattern_key": null,
+      "raw": {
+        "first_reel": true,
+        "strategy_id": "20674d4c-bf84-45ca-bc40-dce98d5aeb73",
+        "campaign_id": "1e262f50-1c4b-4f27-875f-dae97f136f42",
+        "strategy_opportunity_id": "4035dcb0-4001-4d11-9709-89e07a6367e4",
+        "spec": {
+          "name": "first_reel_2016_phone",
+          "format": "9:16",
+          "width": 1080,
+          "height": 1920,
+          "duration_sec": 13.0,
+          "duration_range": "10-14s",
+          "platform": "instagram",
+          "trend": {
+            "trend_id": "2026_is_the_new_2016",
+            "category": "nostalgia",
+            "platform": "instagram",
+            "velocity": "high",
+            "freshness": "high",
+            "velocity_score": 0.9,
+            "freshness_score": 0.88,
+            "saturation_score": 0.22,
+            "opportunity_score": 0.9,
+            "expiration_estimate": "short",
+            "source_confidence": 0.86,
+            "viral_mechanism": "nostalgia_reveal",
+            "title": "2026 is the new 2016 nostalgia wave"
+          },
+          "opportunity": {
+            "type": "trend_adaptation",
+            "concept": "POV: You find your 2016 phone",
+            "objective": "reach",
+            "format": "reel",
+            "duration": "10-14s",
+            "hook": "POV: You find your 2016 phone",
+            "audience": "young adults / nostalgia audience",
+            "priority": "P0"
+          },
+          "story": {
+            "beginning": "Present-day person discovers old phone.",
+            "escalation": "Increasingly embarrassing 2016 memories.",
+            "payoff": "Memories feel happier than the present.",
+            "loop": "Phone screen returns to opening state."
+          },
+          "shots": [
+            {
+              "shot": 1,
+              "t0": 0.0,
+              "t1": 1.5,
+              "label": "HOOK",
+              "visual": "Close-up modern phone, slightly imperfect phone-cam",
+              "text": "POV: You find your 2016 phone",
+              "narrative": "hook"
+            },
+            {
+              "shot": 2,
+              "t0": 1.5,
+              "t1": 3.0,
+              "label": "UNLOCK",
+              "visual": "Phone unlock \u2192 date 2016, old UI aesthetic",
+              "text": "2016",
+              "narrative": "setup"
+            },
+            {
+              "shot": 3,
+              "t0": 3.0,
+              "t1": 5.0,
+              "label": "SELFIE",
+              "visual": "Flash selfie, grain, 2016 colors",
+              "text": "why did I dress like this \ud83d\ude2d",
+              "narrative": "escalation"
+            },
+            {
+              "shot": 4,
+              "t0": 5.0,
+              "t1": 7.0,
+              "label": "STATUS",
+              "visual": "Old status/message bubble",
+              "text": "Life is good \u2764\ufe0f",
+              "narrative": "escalation"
+            },
+            {
+              "shot": 5,
+              "t0": 7.0,
+              "t1": 9.5,
+              "label": "MONTAGE",
+              "visual": "Music player, Snapchat filter, wired earphones, old IG UI",
+              "text": null,
+              "narrative": "reveal"
+            },
+            {
+              "shot": 6,
+              "t0": 9.5,
+              "t1": 12.0,
+              "label": "PUNCHLINE",
+              "visual": "Black / sparse frame",
+              "text": "bro was actually happier.",
+              "narrative": "payoff"
+            },
+            {
+              "shot": 7,
+              "t0": 12.0,
+              "t1": 13.0,
+              "label": "LOOP",
+              "visual": "Return to phone unlock (loop)",
+              "text": "POV: You find your 2016 phone",
+              "narrative": "loop"
+            }
+          ],
+          "audio": {
+            "audio_strategy": "platform_native",
+            "trend_audio": true,
+            "note": "Select current native Instagram trend audio at publish time"
+          },
+          "caption": "2016 really had no business being this good \ud83d\ude2d",
+          "hashtags": [
+            "#2016",
+            "#nostalgia",
+            "#2016nostalgia"
+          ],
+          "creative_direction": {
+            "style": "phone-camera imperfect nostalgia",
+            "avoid": [
+              "cinematic corporate",
+              "generic AI imagery",
+              "logo intro",
+              "heavy branding"
+            ]
+          }
+        }
+      }
+    },
+    "story_id": "e523520d-191c-4cec-88c8-1430a2d696ed",
+    "storyboard_id": "10585b2e-9d5c-4a57-a8a2-ab355db915c1",
+    "asset_ids": [],
+    "generation_request_ids": [
+      "34c70e96-efd2-4c11-8373-aa2e29595d54",
+      "40ca0fdb-9efd-4caa-8ea1-3fab1a1fd77d",
+      "01a3b36d-9ecd-4145-9f3b-726fc7644874",
+      "9fa2f5c0-c612-42e1-b945-3b9b9af747f0",
+      "328900b3-5567-4963-a0d8-2ee3621678db",
+      "b914da43-0d3b-4501-bcf4-363ce99bde6d",
+      "48478789-faf8-4021-93b5-bdf3f97ac3ac",
+      "9d620011-9653-44d1-bc30-e8b9e585a549",
+      "35ca3007-f0c9-43a6-9229-77d9e61f12fc",
+      "d90f90fa-151e-424d-8f89-57ff9048f587",
+      "fe4fe48b-ff90-4f7e-b218-b2f77f55e3e0"
+    ],
+    "generation_run_id": "34c70e96-efd2-4c11-8373-aa2e29595d54",
+    "qa_run_id": null,
+    "assembly_run_id": null
+  },
+  "job": {
+    "job_id": "9dcb4c87-624b-4e69-90fe-087429caaf03",
+    "status": "FAILED",
+    "stage": "FAILED",
+    "publication_id": null
+  },
+  "audio_strategy": {
+    "mode": "generated",
+    "voiceover": true,
+    "music_bed": true,
+    "providers": {
+      "voice": "elevenlabs:TX3LPaxmHKxFdv7VOQHJ",
+      "music": "replicate:stability-ai/stable-audio-2.5"
+    }
+  },
+  "qa_checklist": {
+    "hook_without_audio": true,
+    "first_frame_understandable": true,
+    "punchline_lands": true,
+    "loop_works": true,
+    "aspect": "1080x1920",
+    "duration_sec": 13,
+    "trend_still_active_at_publish": true
+  },
+  "note": "Rendered silent 9:16 reel from live AI video clips. Native trend audio attaches at publish.",
+  "render": {
+    "render_uri": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone.mp4",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "duration_sec": 13.0,
+    "audio": {
+      "voiceover": "storage/first_reel/content_4e8f7b3d39/voiceover.mp3",
+      "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+      "voice_name": "Liam (premade)",
+      "music_bed": "storage/first_reel/content_4e8f7b3d39/music_bed.mp3",
+      "audio_mix": "storage/first_reel/content_4e8f7b3d39/audio_mix.m4a",
+      "silent_backup": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone_silent.mp4",
+      "with_audio": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone_with_audio.mp4",
+      "main": "storage/first_reel/content_4e8f7b3d39/first_reel_2016_phone.mp4",
+      "strategy": "generated_bed_plus_elevenlabs_vo",
+      "music_prompt": "Nostalgic 2016 indie phone-memory instrumental, soft lo-fi guitar and warm pads, gentle kick, bittersweet and intimate, no vocals, vertical reel background bed, 15 seconds, clean ending",
+      "vo_text": "POV: You find your 2016 phone. bro was actually happier.. 2016 really had no business being this good \ud83d\ude2d"
+    },
+    "audio_strategy": "generated_bed_plus_vo",
+    "ffmpeg": "/Users/ishangupta/post-engine/storage/bin/ffmpeg",
+    "ffmpeg_used": true,
+    "silent_master": false,
+    "visual_kind": "live_video",
+    "note": "Silent master \u2014 attach trending platform-native audio at Instagram publish."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "provider": "runway",
+  "model": "gen4.5",
+  "task_id": "da32c2bd-8ce8-45b5-9089-9b2540bd9dfe",
+  "prompt": "photorealistic amateur iPhone snapshot, 2016 digital photography, fingerprint smudges on the lens, slight motion blur, visible noise/grain, harsh on-camera flash or dim bedroom lamp, not cinematic, not studio, no text overlay, no watermark, no logo, vertical 9:16 composition. Extreme close-up photograph of an iPhone screen showing old iMessage, green and blue bubbles, one message reading Life is good with a red heart, iOS 9 Messages UI, photoreal phone screen, no extra captions.. Animate as shor",
+  "duration_sec": 5,
+  "ratio": "720:1280",
+  "seed": null,
+  "mode": "image_to_video"
+}

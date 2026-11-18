@@ -1,0 +1,10 @@
+{
+  "provider": "runway",
+  "model": "gen4.5",
+  "task_id": "27be0fcc-632e-4fe8-b645-32462ae439dd",
+  "prompt": "photorealistic amateur iPhone snapshot, 2016 digital photography, fingerprint smudges on the lens, slight motion blur, visible noise/grain, harsh on-camera flash or dim bedroom lamp, not cinematic, not studio, no text overlay, no watermark, no logo, vertical 9:16 composition. First-person photo of an old iPhone 6 lock screen, iOS 9 aesthetic, date Saturday June 11 2016, slide to unlock, round home button, tiny crack in the corner of the glass, phone held in a hand.. Animate as short video: subtl",
+  "duration_sec": 5,
+  "ratio": "720:1280",
+  "seed": null,
+  "mode": "image_to_video"
+}

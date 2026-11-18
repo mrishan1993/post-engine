@@ -1,0 +1,10 @@
+{
+  "shot": 6,
+  "label": "FOOT",
+  "weight": 1.0,
+  "text": "Even the leaf under Krishna's foot.",
+  "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Extreme close-up of a divine arrow circling a bare foot pressing a hidden leaf into the earth, golden dust, miraculous precision, sacred tension.",
+  "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_06_foot.png",
+  "visual_kind": "live_api",
+  "provider": "replicate:flux-schnell"
+}

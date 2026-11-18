@@ -9,7 +9,8 @@ from rich.table import Table
 
 from config.settings import get_settings
 from db.session import get_session, init_db, reset_engine
-from first_reel.render import latest_package_dir, render_content_id, render_package_dir, resolve_ffmpeg
+from amp_platform.procedural_media import resolve_ffmpeg
+from first_reel.render import latest_package_dir, render_content_id, render_package_dir
 from first_reel.runner import run_first_reel
 from first_reel.spec import reel_spec
 
@@ -35,6 +36,12 @@ def run_cmd(
         "--live/--procedural",
         help="Generate stills with live image APIs (FAL/OpenAI/Replicate) instead of procedural plates",
     ),
+    video: bool = typer.Option(
+        False,
+        "--video/--stills",
+        help="Generate real AI video clips (Runway I2V from stills) instead of Ken Burns stills",
+    ),
+    prefer_video: str = typer.Option("runway", "--prefer-video", help="runway or google_veo"),
     json_out: bool = typer.Option(False, "--json"),
 ) -> None:
     """Produce Reel #1 through the real pipeline (2016 nostalgia POV)."""
@@ -43,7 +50,14 @@ def run_cmd(
         raise typer.Exit(1)
     _init()
     with get_session() as session:
-        result = run_first_reel(session, character_slug=character, publish=True, live=live)
+        result = run_first_reel(
+            session,
+            character_slug=character,
+            publish=True,
+            live=live,
+            video=video,
+            prefer_video=prefer_video,
+        )
         render_info = None
         if render and result.get("package"):
             pkg_path = Path((result["package"]).get("package_path") or "")

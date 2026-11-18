@@ -1,0 +1,14 @@
+{
+  "provider": "replicate:black-forest-labs/flux-schnell",
+  "errors": [],
+  "shots": 7,
+  "providers": [
+    "replicate:black-forest-labs/flux-schnell",
+    "replicate:black-forest-labs/flux-schnell",
+    "replicate:black-forest-labs/flux-schnell",
+    "replicate:black-forest-labs/flux-schnell",
+    "replicate:black-forest-labs/flux-schnell",
+    "replicate:black-forest-labs/flux-schnell",
+    "replicate:black-forest-labs/flux-schnell"
+  ]
+}

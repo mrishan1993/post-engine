@@ -1,0 +1,10 @@
+{
+  "shot": 10,
+  "label": "KHATU",
+  "weight": 1.3,
+  "text": "Khatu Shyam. Haare ka sahara.",
+  "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Devotional portrait of Khatu Shyam as a serene blue-toned divine youth with turban and tilak, temple glow, marigold flowers, warm bhakti atmosphere, worshipful.",
+  "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_10_khatu.png",
+  "visual_kind": "live_api",
+  "provider": "replicate:flux-schnell"
+}

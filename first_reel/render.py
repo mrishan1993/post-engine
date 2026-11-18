@@ -96,39 +96,86 @@ def _motion_vf(shot: dict[str, Any], duration: float) -> str:
     return ",".join(parts)
 
 
+def _overlay_vf(shot: dict[str, Any]) -> str:
+    """Scale/crop AI video + optional drawtext (no Ken Burns — motion comes from the model)."""
+    parts = [
+        f"scale={_WIDTH}:{_HEIGHT}:force_original_aspect_ratio=increase",
+        f"crop={_WIDTH}:{_HEIGHT}",
+        f"fps={_FPS}",
+        "format=yuv420p",
+    ]
+    text = shot.get("text")
+    if text:
+        escaped = _escape_drawtext(str(text))
+        size, y_expr = _text_style(shot)
+        parts.append(
+            f"drawtext=fontfile={_fontfile()}:text='{escaped}':fontsize={size}:"
+            f"fontcolor=white:borderw=3:bordercolor=black@0.75:box=1:boxcolor=black@0.4:"
+            f"boxborderw=22:x=(w-text_w)/2:y={y_expr}"
+        )
+    if shot.get("label") == "SELFIE":
+        parts.append("fade=t=in:st=0:d=0.12:color=white")
+    return ",".join(parts)
+
+
 def _render_shot_clip(
     *,
     ffmpeg: str,
     frame: Path,
     shot: dict[str, Any],
     out_path: Path,
+    video_clip: Path | None = None,
 ) -> None:
     duration = _shot_duration(shot)
-    vf = _motion_vf(shot, duration)
-    cmd = [
-        ffmpeg,
-        "-y",
-        "-hide_banner",
-        "-loglevel",
-        "error",
-        "-loop",
-        "1",
-        "-t",
-        f"{duration:.3f}",
-        "-i",
-        str(frame),
-        "-vf",
-        vf,
-        "-an",
-        "-c:v",
-        "libx264",
-        "-pix_fmt",
-        "yuv420p",
-        "-r",
-        str(_FPS),
-        str(out_path),
-    ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120, check=False)
+    if video_clip is not None and video_clip.exists():
+        vf = _overlay_vf(shot)
+        cmd = [
+            ffmpeg,
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            str(video_clip),
+            "-t",
+            f"{duration:.3f}",
+            "-vf",
+            vf,
+            "-an",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-r",
+            str(_FPS),
+            str(out_path),
+        ]
+    else:
+        vf = _motion_vf(shot, duration)
+        cmd = [
+            ffmpeg,
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-loop",
+            "1",
+            "-t",
+            f"{duration:.3f}",
+            "-i",
+            str(frame),
+            "-vf",
+            vf,
+            "-an",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-r",
+            str(_FPS),
+            str(out_path),
+        ]
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180, check=False)
     if proc.returncode != 0 or not out_path.exists():
         raise RuntimeError(proc.stderr[-2000:] if proc.stderr else "ffmpeg shot render failed")
 
@@ -158,9 +205,16 @@ def render_package_dir(
     if not visual_kind and frames_meta:
         visual_kind = str(frames_meta[0].get("visual_kind") or "")
 
-    # Upgrade old solid-color packages in place, but never overwrite live API stills.
+    # Upgrade old solid-color packages in place, but never overwrite live stills/video.
     if regenerate_plates is None:
-        regenerate_plates = visual_kind not in {"live_api", "replicate", "fal", "openai", "gemini"}
+        regenerate_plates = visual_kind not in {
+            "live_api",
+            "live_video",
+            "replicate",
+            "fal",
+            "openai",
+            "gemini",
+        }
     if regenerate_plates:
         from first_reel.plates import write_shot_frames
 
@@ -170,8 +224,23 @@ def render_package_dir(
         package["visual_kind"] = visual_kind
 
     frame_by_shot: dict[int, Path] = {}
+    video_by_shot: dict[int, Path] = {}
     for item in frames_meta:
-        frame_by_shot[int(item["shot"])] = Path(item["frame"])
+        shot_n = int(item["shot"])
+        if item.get("frame"):
+            frame_by_shot[shot_n] = Path(item["frame"])
+        if item.get("clip"):
+            video_by_shot[shot_n] = Path(item["clip"])
+    # Discover AI clips on disk even if package JSON is stale.
+    for mp4 in sorted((package_dir / "frames").glob("shot_*.mp4")):
+        try:
+            shot_n = int(mp4.name.split("_")[1])
+        except (IndexError, ValueError):
+            continue
+        video_by_shot.setdefault(shot_n, mp4)
+    if video_by_shot and visual_kind != "live_video":
+        visual_kind = "live_video"
+        package["visual_kind"] = visual_kind
 
     out_path = package_dir / out_name
     with tempfile.TemporaryDirectory(prefix="first_reel_render_") as tmp:
@@ -179,15 +248,25 @@ def render_package_dir(
         concat_lines: list[str] = []
         for shot in shots:
             shot_n = int(shot["shot"])
+            video_clip = video_by_shot.get(shot_n)
             frame = frame_by_shot.get(shot_n)
             if frame is None or not frame.exists():
                 candidates = sorted((package_dir / "frames").glob(f"shot_{shot_n:02d}_*.png"))
                 candidates = [p for p in candidates if "card" not in p.name]
-                if not candidates:
+                if candidates:
+                    frame = candidates[0]
+                elif video_clip is None:
                     raise FileNotFoundError(f"missing frame for shot {shot_n}")
-                frame = candidates[0]
+                else:
+                    frame = video_clip
             clip = tmp_path / f"shot_{shot_n:02d}.mp4"
-            _render_shot_clip(ffmpeg=ffmpeg, frame=frame, shot=shot, out_path=clip)
+            _render_shot_clip(
+                ffmpeg=ffmpeg,
+                frame=frame,
+                shot=shot,
+                out_path=clip,
+                video_clip=video_clip if video_clip and video_clip.exists() else None,
+            )
             safe = str(clip).replace("'", "'\\''")
             concat_lines.append(f"file '{safe}'")
 
@@ -235,7 +314,12 @@ def render_package_dir(
     }
     package["render"] = render_info
     package["visual_kind"] = visual_kind or "procedural_phone_cam"
-    if visual_kind == "live_api":
+    if visual_kind == "live_video":
+        package["note"] = (
+            "Rendered silent 9:16 reel from live AI video clips. "
+            "Native trend audio attaches at publish."
+        )
+    elif visual_kind == "live_api":
         package["note"] = (
             "Rendered silent 9:16 reel from live API stills + motion. "
             "Native trend audio attaches at publish."

@@ -1,0 +1,14 @@
+{
+  "provider": "cached",
+  "errors": [
+    "shot 2 (UNLOCK): gemini: gemini-2.5-flash-image HTTP 429",
+    "shot 3 (SELFIE): gemini: gemini-2.5-flash-image HTTP 429",
+    "shot 4 (STATUS): gemini: gemini-2.5-flash-image HTTP 429",
+    "shot 6 (PUNCHLINE): gemini: gemini-2.5-flash-image HTTP 429",
+    "shot 7 (LOOP): gemini: gemini-2.5-flash-image HTTP 429",
+    "shot 2 (UNLOCK): used procedural bypass",
+    "shot 3 (SELFIE): used procedural bypass",
+    "shot 4 (STATUS): used procedural bypass"
+  ],
+  "shots": 7
+}

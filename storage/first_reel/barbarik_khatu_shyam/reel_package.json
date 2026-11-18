@@ -1,0 +1,205 @@
+{
+  "reel": "barbarik_khatu_shyam",
+  "shots": [
+    {
+      "shot": 1,
+      "label": "WALK",
+      "weight": 1.1,
+      "text": "Before Kurukshetra\u2026",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A young warrior Barbarik walking alone toward a vast dusty battlefield at dawn, bow on his back, saffron and earth-toned armor, wind in his hair, epic wide shot.",
+      "t0": 0.0,
+      "t1": 7.016
+    },
+    {
+      "shot": 2,
+      "label": "ARROWS",
+      "weight": 1.0,
+      "text": "Three arrows. Gift of Shiva.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Close-up of three divine glowing arrows in a young warrior's hand, golden divine light, carved wood and celestial energy, sacred aura.",
+      "t0": 7.016,
+      "t1": 13.394
+    },
+    {
+      "shot": 3,
+      "label": "VOW",
+      "weight": 1.0,
+      "text": "Always for the side that is losing.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Young warrior Barbarik kneeling in vow before a battlefield shrine, eyes fierce with resolve, incense smoke, sacred oath atmosphere.",
+      "t0": 13.394,
+      "t1": 19.772
+    },
+    {
+      "shot": 4,
+      "label": "KRISHNA",
+      "weight": 1.1,
+      "text": "With only three arrows?",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Krishna disguised as a humble Brahmin stopping a young warrior on a dusty road, peacock-feather hint subtle, golden hour, confrontation of destiny.",
+      "t0": 19.772,
+      "t1": 26.788
+    },
+    {
+      "shot": 5,
+      "label": "LEAVES",
+      "weight": 1.2,
+      "text": "One arrow. Every leaf.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A single divine arrow streaking through a giant peepal tree, piercing every leaf in a magical cascade of light, mystical forest clearing.",
+      "t0": 26.788,
+      "t1": 34.442
+    },
+    {
+      "shot": 6,
+      "label": "FOOT",
+      "weight": 1.0,
+      "text": "Even the leaf under Krishna's foot.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Extreme close-up of a divine arrow circling a bare foot pressing a hidden leaf into the earth, golden dust, miraculous precision, sacred tension.",
+      "t0": 34.442,
+      "t1": 40.82
+    },
+    {
+      "shot": 7,
+      "label": "GIFT",
+      "weight": 1.2,
+      "text": "Krishna asked for his head.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Young warrior Barbarik offering his head in devotion to Krishna, serene sacrifice, divine glow, emotional mythological climax, respectful and sacred.",
+      "t0": 40.82,
+      "t1": 48.474
+    },
+    {
+      "shot": 8,
+      "label": "HILL",
+      "weight": 1.0,
+      "text": "He only wished to watch.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A sacred severed head of a warrior placed on a rocky hilltop overlooking the Kurukshetra battlefield below, twilight, solemn and divine, not gory.",
+      "t0": 48.474,
+      "t1": 54.852
+    },
+    {
+      "shot": 9,
+      "label": "CHAKRA",
+      "weight": 1.1,
+      "text": "I saw only Krishna's Chakra.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Krishna's blazing Sudarshan Chakra spinning through a chaotic battlefield, divine blue light cutting through warriors, epic mythological spectacle.",
+      "t0": 54.852,
+      "t1": 61.868
+    },
+    {
+      "shot": 10,
+      "label": "KHATU",
+      "weight": 1.3,
+      "text": "Khatu Shyam. Haare ka sahara.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Devotional portrait of Khatu Shyam as a serene blue-toned divine youth with turban and tilak, temple glow, marigold flowers, warm bhakti atmosphere, worshipful.",
+      "t0": 61.868,
+      "t1": 70.16
+    }
+  ],
+  "frames": [
+    {
+      "shot": 1,
+      "label": "WALK",
+      "weight": 1.1,
+      "text": "Before Kurukshetra\u2026",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A young warrior Barbarik walking alone toward a vast dusty battlefield at dawn, bow on his back, saffron and earth-toned armor, wind in his hair, epic wide shot.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_01_walk.png",
+      "visual_kind": "live_api",
+      "provider": "cached"
+    },
+    {
+      "shot": 2,
+      "label": "ARROWS",
+      "weight": 1.0,
+      "text": "Three arrows. Gift of Shiva.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Close-up of three divine glowing arrows in a young warrior's hand, golden divine light, carved wood and celestial energy, sacred aura.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_02_arrows.png",
+      "visual_kind": "live_api",
+      "provider": "cached"
+    },
+    {
+      "shot": 3,
+      "label": "VOW",
+      "weight": 1.0,
+      "text": "Always for the side that is losing.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Young warrior Barbarik kneeling in vow before a battlefield shrine, eyes fierce with resolve, incense smoke, sacred oath atmosphere.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_03_vow.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    },
+    {
+      "shot": 4,
+      "label": "KRISHNA",
+      "weight": 1.1,
+      "text": "With only three arrows?",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Krishna disguised as a humble Brahmin stopping a young warrior on a dusty road, peacock-feather hint subtle, golden hour, confrontation of destiny.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_04_krishna.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    },
+    {
+      "shot": 5,
+      "label": "LEAVES",
+      "weight": 1.2,
+      "text": "One arrow. Every leaf.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A single divine arrow streaking through a giant peepal tree, piercing every leaf in a magical cascade of light, mystical forest clearing.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_05_leaves.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    },
+    {
+      "shot": 6,
+      "label": "FOOT",
+      "weight": 1.0,
+      "text": "Even the leaf under Krishna's foot.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Extreme close-up of a divine arrow circling a bare foot pressing a hidden leaf into the earth, golden dust, miraculous precision, sacred tension.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_06_foot.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    },
+    {
+      "shot": 7,
+      "label": "GIFT",
+      "weight": 1.2,
+      "text": "Krishna asked for his head.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Young warrior Barbarik offering his head in devotion to Krishna, serene sacrifice, divine glow, emotional mythological climax, respectful and sacred.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_07_gift.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    },
+    {
+      "shot": 8,
+      "label": "HILL",
+      "weight": 1.0,
+      "text": "He only wished to watch.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A sacred severed head of a warrior placed on a rocky hilltop overlooking the Kurukshetra battlefield below, twilight, solemn and divine, not gory.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_08_hill.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    },
+    {
+      "shot": 9,
+      "label": "CHAKRA",
+      "weight": 1.1,
+      "text": "I saw only Krishna's Chakra.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Krishna's blazing Sudarshan Chakra spinning through a chaotic battlefield, divine blue light cutting through warriors, epic mythological spectacle.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_09_chakra.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    },
+    {
+      "shot": 10,
+      "label": "KHATU",
+      "weight": 1.3,
+      "text": "Khatu Shyam. Haare ka sahara.",
+      "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Devotional portrait of Khatu Shyam as a serene blue-toned divine youth with turban and tilak, temple glow, marigold flowers, warm bhakti atmosphere, worshipful.",
+      "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_10_khatu.png",
+      "visual_kind": "live_api",
+      "provider": "replicate:flux-schnell"
+    }
+  ],
+  "visual_kind": "live_api",
+  "duration_sec": 70.16,
+  "render_uri": "storage/first_reel/barbarik_khatu_shyam/barbarik_khatu_shyam.mp4",
+  "audio": {
+    "voiceover": "storage/first_reel/barbarik_khatu_shyam/voiceover.mp3",
+    "music": "storage/first_reel/barbarik_khatu_shyam/music_bed.mp3"
+  },
+  "note": "AI stills + motion; Runway credits exhausted so clips are animated stills. VO+devotional bed muxed."
+}

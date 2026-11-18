@@ -14,12 +14,33 @@ def write_reel_package(
     lineage: dict[str, Any],
     job: dict[str, Any],
     live: bool = False,
+    video: bool = False,
+    prefer_video: str = "runway",
 ) -> dict[str, Any]:
     """Write the first-reel deliverable package (spec + phone-cam plates + lineage)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     spec = reel_spec()
-    frames = write_shot_frames(out_dir / "frames", live=live)
-    visual_kind = "live_api" if live else "procedural_phone_cam"
+    frames = write_shot_frames(
+        out_dir / "frames",
+        live=live,
+        video=video,
+        prefer_video=prefer_video,
+    )
+    if video:
+        visual_kind = "live_video"
+        note = (
+            "Live AI video clips (Runway image-to-video from stills) — "
+            "silent master; native audio at publish."
+        )
+    elif live:
+        visual_kind = "live_api"
+        note = "Live API stills (FAL / OpenAI / Replicate) — silent master; native audio at publish."
+    else:
+        visual_kind = "procedural_phone_cam"
+        note = (
+            "Procedural phone-cam plates (unlock / selfie / status / montage) — "
+            "silent master; native audio attaches at publish."
+        )
     package = {
         "reel": "first_reel_2016_phone",
         "spec": spec,
@@ -46,14 +67,7 @@ def write_reel_package(
             "duration_sec": 13,
             "trend_still_active_at_publish": True,
         },
-        "note": (
-            "Live API stills (FAL / OpenAI / Replicate) — silent master; native audio at publish."
-            if live
-            else (
-                "Procedural phone-cam plates (unlock / selfie / status / montage) — "
-                "silent master; native audio attaches at publish."
-            )
-        ),
+        "note": note,
     }
     path = out_dir / "reel_package.json"
     path.write_text(json.dumps(package, indent=2, default=str))

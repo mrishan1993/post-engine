@@ -45,12 +45,13 @@ def generate_video(
     if not runway_configured():
         raise RunwayError("RUNWAY_API_KEY not configured")
 
-    # Runway text_to_video / image_to_video
-    dur = int(max(2, min(10, round(duration_sec))))
+    # Runway text_to_video / image_to_video (gen4_turbo retired; gen4.5 is current)
+    dur = int(max(5, min(10, round(duration_sec))))
+    model = "gen4.5"
     if image_url:
         endpoint = f"{RUNWAY_BASE}/image_to_video"
         payload: dict[str, Any] = {
-            "model": "gen4_turbo",
+            "model": model,
             "promptText": prompt[:1000],
             "promptImage": image_url,
             "ratio": ratio,
@@ -59,7 +60,7 @@ def generate_video(
     else:
         endpoint = f"{RUNWAY_BASE}/text_to_video"
         payload = {
-            "model": "gen4_turbo",
+            "model": model,
             "promptText": prompt[:1000],
             "ratio": ratio,
             "duration": dur,
@@ -102,11 +103,13 @@ def generate_video(
         json.dumps(
             {
                 "provider": "runway",
+                "model": model,
                 "task_id": task_id,
                 "prompt": prompt[:500],
                 "duration_sec": dur,
                 "ratio": ratio,
                 "seed": seed,
+                "mode": "image_to_video" if image_url else "text_to_video",
             },
             indent=2,
         ),
