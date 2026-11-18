@@ -253,48 +253,125 @@ def generate_stills(frames_dir: Path) -> list[dict[str, Any]]:
     return frames
 
 
+def _replicate_upload_image(client: httpx.Client, token: str, path: Path) -> str:
+    with path.open("rb") as f:
+        up = client.post(
+            "https://api.replicate.com/v1/files",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"content": (path.name, f, "image/png")},
+        )
+    if up.status_code >= 400:
+        raise RuntimeError(f"replicate file upload {up.status_code}: {up.text[:300]}")
+    return str(up.json()["urls"]["get"])
+
+
+def _replicate_wan_i2v(
+    client: httpx.Client,
+    token: str,
+    *,
+    image_url: str,
+    prompt: str,
+    out_path: Path,
+) -> None:
+    r = client.post(
+        "https://api.replicate.com/v1/models/wan-video/wan-2.2-i2v-fast/predictions",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Prefer": "wait=60",
+            "Content-Type": "application/json",
+        },
+        json={
+            "input": {
+                "image": image_url,
+                "prompt": prompt[:1500],
+                "resolution": "480p",
+                "num_frames": 81,
+                "frames_per_second": 16,
+                "interpolate_output": True,
+                "go_fast": True,
+            }
+        },
+        timeout=300.0,
+    )
+    if r.status_code >= 400:
+        raise RuntimeError(f"wan i2v submit {r.status_code}: {r.text[:400]}")
+    data = r.json()
+    status = data.get("status")
+    get_url = (data.get("urls") or {}).get("get")
+    while status in {"starting", "processing"} and get_url:
+        time.sleep(3)
+        data = client.get(get_url, headers={"Authorization": f"Bearer {token}"}).json()
+        status = data.get("status")
+    if status != "succeeded":
+        raise RuntimeError(f"wan i2v failed: {data.get('error') or status}")
+    out = data.get("output")
+    url = out[0] if isinstance(out, list) else out
+    if not url:
+        raise RuntimeError(f"wan i2v no output: {data}")
+    out_path.write_bytes(client.get(str(url)).content)
+
+
 def generate_clips(frames_dir: Path, frames: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    if "runway" not in available_video_backends():
-        print("[video] runway unavailable — stills only", flush=True)
-        return frames
+    """Animate each still into real AI video (Replicate Wan I2V, Runway fallback)."""
+    token = os.environ.get("REPLICATE_API_TOKEN") or ""
     out: list[dict[str, Any]] = []
-    for item in frames:
-        shot_n = int(item["shot"])
-        label = str(item["label"]).lower()
-        dest = frames_dir / f"shot_{shot_n:02d}_{label}.mp4"
-        still = Path(item["frame"])
-        print(f"[video] shot {shot_n} {item['label']}", flush=True)
-        if dest.exists() and dest.stat().st_size > 50_000:
-            used = "cached_video"
-        else:
-            prompt = (
-                f"{item['prompt']} Animate with subtle cinematic camera drift, "
-                "sacred mythological motion, no text."
-            )
-            data_uri = f"data:image/png;base64,{base64.b64encode(still.read_bytes()).decode('ascii')}"
-            try:
-                generate_video(
-                    prompt,
-                    duration_sec=5,
-                    image_url=data_uri,
-                    out_path=dest,
-                    prefer="runway",
+    with httpx.Client(timeout=httpx.Timeout(300.0, connect=20.0), follow_redirects=True) as client:
+        for item in frames:
+            shot_n = int(item["shot"])
+            label = str(item["label"]).lower()
+            dest = frames_dir / f"shot_{shot_n:02d}_{label}.mp4"
+            still = Path(item["frame"])
+            print(f"[video] shot {shot_n} {item['label']}", flush=True)
+            used = None
+            last_err = None
+            if dest.exists() and dest.stat().st_size > 50_000:
+                used = "cached_video"
+            else:
+                prompt = (
+                    f"{item['prompt']} Animate as continuous cinematic video with natural motion, "
+                    "camera drift, cloth/wind movement, sacred mythological atmosphere, no text."
                 )
-                used = "runway:i2v:gen4.5"
-            except Exception as exc:  # noqa: BLE001
-                print(f"  video failed: {exc}", flush=True)
+                if token:
+                    try:
+                        image_url = _replicate_upload_image(client, token, still)
+                        _replicate_wan_i2v(
+                            client, token, image_url=image_url, prompt=prompt, out_path=dest
+                        )
+                        used = "replicate:wan-2.2-i2v-fast"
+                    except Exception as exc:  # noqa: BLE001
+                        last_err = f"replicate: {exc}"
+                        print(f"  replicate failed: {exc}", flush=True)
+                if used is None and "runway" in available_video_backends():
+                    try:
+                        data_uri = (
+                            "data:image/png;base64,"
+                            + base64.b64encode(still.read_bytes()).decode("ascii")
+                        )
+                        generate_video(
+                            prompt,
+                            duration_sec=5,
+                            image_url=data_uri,
+                            out_path=dest,
+                            prefer="runway",
+                        )
+                        used = "runway:i2v:gen4.5"
+                    except Exception as exc:  # noqa: BLE001
+                        last_err = f"{last_err} | runway: {exc}" if last_err else f"runway: {exc}"
+                        print(f"  runway failed: {exc}", flush=True)
+            if used is None or not dest.exists() or dest.stat().st_size < 50_000:
+                print(f"  SKIP (no AI video): {last_err}", flush=True)
                 out.append(item)
                 continue
-        merged = {
-            **item,
-            "clip": str(dest),
-            "visual_kind": "live_video",
-            "provider": used,
-        }
-        (frames_dir / f"shot_{shot_n:02d}_video_card.json").write_text(json.dumps(merged, indent=2))
-        out.append(merged)
-        print(f"  ok {used} {dest.stat().st_size}", flush=True)
-        time.sleep(1.5)
+            merged = {
+                **item,
+                "clip": str(dest),
+                "visual_kind": "live_video",
+                "provider": used,
+            }
+            (frames_dir / f"shot_{shot_n:02d}_video_card.json").write_text(json.dumps(merged, indent=2))
+            out.append(merged)
+            print(f"  ok {used} {dest.stat().st_size}", flush=True)
+            time.sleep(2)
     return out
 
 

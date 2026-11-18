@@ -1,0 +1,11 @@
+{
+  "shot": 2,
+  "label": "ARROWS",
+  "weight": 1.0,
+  "text": "Three arrows. Gift of Shiva.",
+  "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Close-up of three divine glowing arrows in a young warrior's hand, golden divine light, carved wood and celestial energy, sacred aura.",
+  "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_02_arrows.png",
+  "clip": "storage/first_reel/barbarik_khatu_shyam/frames/shot_02_arrows.mp4",
+  "visual_kind": "live_video",
+  "provider": "replicate:wan-2.2-i2v-fast"
+}

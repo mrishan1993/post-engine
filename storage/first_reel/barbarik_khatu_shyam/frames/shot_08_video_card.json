@@ -1,0 +1,11 @@
+{
+  "shot": 8,
+  "label": "HILL",
+  "weight": 1.0,
+  "text": "He only wished to watch.",
+  "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A sacred severed head of a warrior placed on a rocky hilltop overlooking the Kurukshetra battlefield below, twilight, solemn and divine, not gory.",
+  "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_08_hill.png",
+  "clip": "storage/first_reel/barbarik_khatu_shyam/frames/shot_08_hill.mp4",
+  "visual_kind": "live_video",
+  "provider": "replicate:wan-2.2-i2v-fast"
+}

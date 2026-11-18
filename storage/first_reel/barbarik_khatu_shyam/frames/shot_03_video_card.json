@@ -1,0 +1,11 @@
+{
+  "shot": 3,
+  "label": "VOW",
+  "weight": 1.0,
+  "text": "Always for the side that is losing.",
+  "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. Young warrior Barbarik kneeling in vow before a battlefield shrine, eyes fierce with resolve, incense smoke, sacred oath atmosphere.",
+  "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_03_vow.png",
+  "clip": "storage/first_reel/barbarik_khatu_shyam/frames/shot_03_vow.mp4",
+  "visual_kind": "live_video",
+  "provider": "replicate:wan-2.2-i2v-fast"
+}

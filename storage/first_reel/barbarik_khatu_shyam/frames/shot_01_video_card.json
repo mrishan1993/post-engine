@@ -1,0 +1,11 @@
+{
+  "shot": 1,
+  "label": "WALK",
+  "weight": 1.1,
+  "text": "Before Kurukshetra\u2026",
+  "prompt": "cinematic mythological Indian epic, dramatic volumetric light, ancient Kurukshetra atmosphere, photoreal digital painting, vertical 9:16 composition, no text overlay, no watermark, no modern objects. A young warrior Barbarik walking alone toward a vast dusty battlefield at dawn, bow on his back, saffron and earth-toned armor, wind in his hair, epic wide shot.",
+  "frame": "storage/first_reel/barbarik_khatu_shyam/frames/shot_01_walk.png",
+  "clip": "storage/first_reel/barbarik_khatu_shyam/frames/shot_01_walk.mp4",
+  "visual_kind": "live_video",
+  "provider": "replicate:wan-2.2-i2v-fast"
+}
